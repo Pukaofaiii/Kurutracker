@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kurutracker{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#8B5CF6',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    {% if user.is_authenticated %}
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b-4 border-primary">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-8">
+                    <!-- Logo -->
+                    <a href="{% url 'core:dashboard' %}" class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                            K
+                        </div>
+                        <span class="ml-3 text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                            Kurutracker
+                        </span>
+                    </a>
+
+                    <!-- Main Navigation -->
+                    <div class="hidden md:flex space-x-1">
+                        <a href="{% url 'core:dashboard' %}"
+                           class="px-4 py-2 rounded-lg text-gray-700 hover:bg-primary hover:text-white transition-all duration-200 font-medium">
+                            Dashboard
+                        </a>
+
+                        <a href="{% url 'items:item_list' %}"
+                           class="px-4 py-2 rounded-lg text-gray-700 hover:bg-primary hover:text-white transition-all duration-200 font-medium">
+                            Items
+                        </a>
+
+                        <a href="{% url 'transfers:pending_requests' %}"
+                           class="px-4 py-2 rounded-lg text-gray-700 hover:bg-primary hover:text-white transition-all duration-200 font-medium">
+                            Transfers
+                        </a>
+
+                        {% if user.is_manager %}
+                        <a href="{% url 'users:user_list' %}"
+                           class="px-4 py-2 rounded-lg text-gray-700 hover:bg-primary hover:text-white transition-all duration-200 font-medium">
+                            Users
+                        </a>
+                        {% endif %}
+
+                        {% if user.is_manager %}
+                        <a href="{% url 'locations:room_list' %}"
+                           class="px-4 py-2 rounded-lg text-gray-700 hover:bg-primary hover:text-white transition-all duration-200 font-medium">
+                            Rooms
+                        </a>
+                        {% endif %}
+
+                        {% if user.is_auditor %}
+                        <a href="{% url 'audit:audit_checklist' %}"
+                           class="px-4 py-2 rounded-lg text-yellow-700 hover:bg-yellow-500 hover:text-white transition-all duration-200 font-medium border border-yellow-500">
+                            Audit
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    <!-- Notification Bell -->
+                    <div class="relative">
+                        <button onclick="toggleNotifications()" class="relative p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition-all duration-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                            {% if unread_notification_count > 0 %}
+                            <span class="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+                                {{ unread_notification_count }}
+                            </span>
+                            {% endif %}
+                        </button>
+
+                        <!-- Notification Dropdown -->
+                        <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
+                            <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                                <h3 class="font-bold text-gray-900">Notifications</h3>
+                                {% if unread_notification_count > 0 %}
+                                <a href="{% url 'notifications:mark_all_as_read' %}" class="text-xs text-primary hover:text-blue-700 font-medium">
+                                    Mark all as read
+                                </a>
+                                {% endif %}
+                            </div>
+                            <div class="max-h-96 overflow-y-auto">
+                                {% if recent_notifications %}
+                                {% for notification in recent_notifications %}
+                                <a href="{% if notification.related_request %}{% url 'transfers:pending_requests' %}{% else %}#{% endif %}"
+                                   class="block p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 {% if not notification.is_read %}bg-blue-50{% endif %}">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white">
+                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <p class="text-sm font-semibold text-gray-900">{{ notification.title }}</p>
+                                            <p class="text-xs text-gray-600 mt-1">{{ notification.message|truncatewords:15 }}</p>
+                                            <p class="text-xs text-gray-400 mt-1">{{ notification.created_at|timesince }} ago</p>
+                                        </div>
+                                        {% if not notification.is_read %}
+                                        <div class="flex-shrink-0">
+                                            <span class="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                                {% endfor %}
+                                {% else %}
+                                <div class="p-8 text-center text-gray-500">
+                                    <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                                    </svg>
+                                    <p class="text-sm">No notifications</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="p-3 border-t border-gray-200 bg-gray-50">
+                                <a href="{% url 'notifications:list' %}" class="block text-center text-sm text-primary hover:text-blue-700 font-medium">
+                                    View all notifications
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'core:account_settings' %}" class="text-right hover:bg-gray-50 px-3 py-2 rounded-lg transition-all duration-200 group">
+                        <p class="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors">{{ user.email }}</p>
+                        <p class="text-xs text-gray-500">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                {% if user.is_manager %}bg-purple-100 text-purple-800
+                                {% elif user.is_staff %}bg-blue-100 text-blue-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ user.get_role_display }}
+                            </span>
+                        </p>
+                    </a>
+                    <a href="{% url 'account_logout' %}"
+                       class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        {% for message in messages %}
+        <div class="animate-slide-in mb-4 p-4 rounded-lg shadow-lg {% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-800
+            {% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-800
+            {% elif message.tags == 'warning' %}bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800
+            {% else %}bg-blue-50 border-l-4 border-blue-500 text-blue-800{% endif %}">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <p class="font-medium">{{ message }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 py-6 bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
+            <p>&copy; 2025 Kurutracker - Asset Management System</p>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle notification dropdown
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('notificationDropdown');
+            const button = event.target.closest('button[onclick="toggleNotifications()"]');
+
+            if (!dropdown.contains(event.target) && !button) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db import models
+from django.core.exceptions import ValidationError
+
+
+class UserManager(BaseUserManager):
+    """Custom user manager for email-based authentication."""
+
+    def create_user(self, email, password=None, **extra_fields):
+        """Create and save a regular user with the given email and password."""
+        if not email:
+            raise ValueError('The Email field must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        """Create and save a manager user with Django admin access."""
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('role', User.Role.MANAGER)
+        extra_fields.setdefault('is_pre_registered', True)
+
+        return self.create_user(email, password, **extra_fields)
+
+
+class User(AbstractUser):
+    """Custom user model with role-based access control."""
+
+    class Role(models.TextChoices):
+        TEACHER = 'TEACHER', 'Teacher'
+        STAFF = 'STAFF', 'Staff'
+        MANAGER = 'MANAGER', 'Manager'
+
+    # Remove username, use email instead
+    username = None
+    email = models.EmailField(unique=True, verbose_name='Email Address')
+
+    # Additional fields
+    role = models.CharField(
+        max_length=10,
+        choices=Role.choices,
+        default=Role.TEACHER,
+        verbose_name='User Role'
+    )
+    is_pre_registered = models.BooleanField(
+        default=False,
+        help_text='User must be pre-registered by Staff/Admin to login'
+    )
+    phone_number = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        verbose_name='Phone Number'
+    )
+    department = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name='Department'
+    )
+    is_auditor = models.BooleanField(
+        default=False,
+        verbose_name='Auditor Permission',
+        help_text='User can access audit checklist and mark items as damaged/lost'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []  # Email is already required by USERNAME_FIELD
+
+    class Meta:
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.get_full_name() or self.email} ({self.get_role_display()})"
+
+    def get_full_name(self):
+        """Return the first_name plus the last_name, with a space in between."""
+        full_name = f"{self.first_name} {self.last_name}".strip()
+        return full_name or self.email
+
+    def get_short_name(self):
+        """Return the short name for the user."""
+        return self.first_name or self.email.split('@')[0]
+
+    @property
+    def is_teacher(self):
+        """Check if user is a teacher."""
+        return self.role == self.Role.TEACHER
+
+    @property
+    def is_staff_member(self):
+        """Check if user is a staff member."""
+        return self.role == self.Role.STAFF
+
+    @property
+    def is_manager(self):
+        """Check if user is a manager."""
+        return self.role == self.Role.MANAGER
+
+    @property
+    def is_admin(self):
+        """Alias for is_manager (backwards compatibility)."""
+        return self.is_manager
+
+    @property
+    def is_staff_or_admin(self):
+        """Check if user is staff or manager."""
+        return self.role in [self.Role.STAFF, self.Role.MANAGER]
+
+    @property
+    def is_staff_or_manager(self):
+        """Check if user is staff or manager."""
+        return self.role in [self.Role.STAFF, self.Role.MANAGER]
+
+    def can_manage_users(self):
+        """Check if user can manage other users."""
+        return self.role in [self.Role.STAFF, self.Role.MANAGER]
+
+    def can_manage_items(self):
+        """Check if user can manage items (CRUD operations)."""
+        return self.role in [self.Role.STAFF, self.Role.MANAGER]
+
+    def can_force_transfer(self):
+        """Check if user can force transfer items without approval."""
+        return self.role == self.Role.MANAGER
+
+    def has_items(self):
+        """Check if user currently holds any items."""
+        return self.current_items.filter(
+            status__in=['NORMAL', 'DAMAGED', 'PENDING_INSPECTION']
+        ).exists()
+
+    def get_item_count(self):
+        """Get count of items currently held by user."""
+        return self.current_items.filter(
+            status__in=['NORMAL', 'DAMAGED', 'PENDING_INSPECTION']
+        ).count()
+
+    def delete(self, *args, **kwargs):
+        """Override delete to prevent deletion of users with items."""
+        if self.has_items():
+            raise ValidationError(
+                f"Cannot delete {self.email}. User still holds {self.get_item_count()} items. "
+                f"Transfer all items first or use Forced Transfer."
+            )
+        super().delete(*args, **kwargs)
+
+    def deactivate(self):
+        """Deactivate user account (set is_active=False)."""
+        if self.has_items():
+            raise ValidationError(
+                f"Cannot deactivate {self.email}. User still holds {self.get_item_count()} items. "
+                f"Transfer all items first or use Forced Transfer."
+            )
+        self.is_active = False
+        self.save()

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Transfer Request - Kurutracker{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    <div class="flex items-center">
+        <a href="{% url 'core:dashboard' %}"
+           class="mr-4 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+        </a>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Assign Item to Teacher</h1>
+            <p class="text-gray-600 mt-1">Create a transfer request to assign an item</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+            <h2 class="text-xl font-bold text-white">Transfer Details</h2>
+        </div>
+
+        <form method="post" class="p-6 space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label for="{{ form.item.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Select Item <span class="text-red-500">*</span>
+                </label>
+                {{ form.item }}
+                {% if form.item.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.item.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.to_user.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Transfer To <span class="text-red-500">*</span>
+                </label>
+                {{ form.to_user }}
+                {% if form.to_user.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.to_user.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Notes
+                </label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.notes.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="flex space-x-4 pt-4 border-t border-gray-200">
+                <button type="submit"
+                        class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                    Create Transfer Request
+                </button>
+                <a href="{% url 'core:dashboard' %}"
+                   class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    select, textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #E5E7EB;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+    }
+    select:focus, textarea:focus {
+        outline: none;
+        border-color: #3B82F6;
+    }
+    textarea {
+        min-height: 100px;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Lost Items - Kurutracker{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-red-600 to-pink-600 rounded-xl shadow-lg p-8 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">Lost Items</h1>
+                <p class="text-red-100">Track and recover missing assets</p>
+            </div>
+            <a href="{% url 'audit:audit_checklist' %}" class="px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg font-semibold transition-all">
+                Back to Audit Checklist
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <p class="text-sm text-gray-500 font-semibold">Total Lost Items</p>
+        <p class="text-4xl font-bold text-red-600">{{ total_lost }}</p>
+    </div>
+
+    <!-- Lost Items Table -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Asset ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Item Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Responsible Person</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Last Known Location</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Lost Since</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for item in lost_items %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ item.asset_id }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ item.current_owner.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {% if item.current_location %}
+                            {{ item.current_location.building }} - F{{ item.current_location.floor }} - R{{ item.current_location.room }}
+                            {% else %}
+                            <span class="text-gray-400">Unknown</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ item.updated_at|date:"Y-m-d" }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <a href="{% url 'audit:found_item' item.id %}" class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-all font-medium">
+                                Found
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-lg font-semibold">No lost items!</p>
+                            <p class="text-sm">All items are accounted for</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

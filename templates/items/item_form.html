@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit Item{% else %}Add New Item{% endif %} - Kurutracker{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex items-center">
+        <a href="{% url 'items:item_list' %}"
+           class="mr-4 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+        </a>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">
+                {% if form.instance.pk %}Edit Item{% else %}Add New Item{% endif %}
+            </h1>
+            <p class="text-gray-600 mt-1">{% if form.instance.pk %}Update item details{% else %}Register a new asset in the system{% endif %}</p>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+            <h2 class="text-xl font-bold text-white">Item Information</h2>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="p-6 space-y-6">
+            {% csrf_token %}
+
+            <!-- Error Messages -->
+            {% if form.non_field_errors %}
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                <div class="flex">
+                    <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="text-sm text-red-700">
+                        {{ form.non_field_errors }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Asset ID -->
+            <div>
+                <label for="{{ form.asset_id.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Asset ID <span class="text-red-500">*</span>
+                </label>
+                {{ form.asset_id }}
+                {% if form.asset_id.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.asset_id.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500">Unique identifier for this item</p>
+            </div>
+
+            <!-- Name -->
+            <div>
+                <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Item Name <span class="text-red-500">*</span>
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.name.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Category -->
+            <div>
+                <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Category
+                </label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.category.errors.0 }}</p>
+                {% endif %}
+                <a href="{% url 'items:category_list' %}" class="text-sm text-blue-600 hover:text-blue-800 mt-1 inline-block">
+                    Manage Categories →
+                </a>
+            </div>
+
+            <!-- Current Owner -->
+            <div>
+                <label for="{{ form.current_owner.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Current Owner <span class="text-red-500">*</span>
+                </label>
+                {{ form.current_owner }}
+                {% if form.current_owner.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.current_owner.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Room (with autocomplete) -->
+            <div>
+                <label for="{{ form.room.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Room
+                </label>
+                <div class="relative">
+                    <input type="text"
+                           id="room-search"
+                           placeholder="Type 3+ characters to search (e.g., sc201)..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                           autocomplete="off">
+                    <div id="room-dropdown" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        <!-- Dropdown items will be inserted here by JavaScript -->
+                    </div>
+                </div>
+                {{ form.room }}
+                {% if form.room.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.room.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500">Type at least 3 characters to search for rooms</p>
+            </div>
+
+            <!-- Location Description -->
+            <div>
+                <label for="{{ form.location_description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Location Description
+                </label>
+                {{ form.location_description }}
+                {% if form.location_description.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.location_description.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500">e.g., Building 1, floor 2</p>
+            </div>
+            <!-- Status -->
+            <div>
+                <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Status <span class="text-red-500">*</span>
+                </label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.status.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Date Acquired -->
+            <div>
+                <label for="{{ form.date_acquired.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Date Acquired <span class="text-red-500">*</span>
+                </label>
+                {{ form.date_acquired }}
+                {% if form.date_acquired.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.date_acquired.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Price -->
+            <div>
+                <label for="{{ form.price.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Price
+                </label>
+                {{ form.price }}
+                {% if form.price.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.price.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Image -->
+            <div>
+                <label for="{{ form.image.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Item Image
+                </label>
+                {% if form.instance.image %}
+                <div class="mb-3">
+                    <img src="{{ form.instance.image.url }}" alt="Current image" class="w-32 h-32 object-cover rounded-lg border-2 border-gray-200">
+                </div>
+                {% endif %}
+                {{ form.image }}
+                {% if form.image.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.image.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex space-x-4 pt-4 border-t border-gray-200">
+                <button type="submit"
+                        class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                    {% if form.instance.pk %}Save Changes{% else %}Create Item{% endif %}
+                </button>
+                <a href="{% url 'items:item_list' %}"
+                   class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    input[type="text"], input[type="number"], input[type="date"], textarea, select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #E5E7EB;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: #3B82F6;
+    }
+    textarea {
+        min-height: 100px;
+    }
+    /* Hide the actual select dropdown */
+    select#{{ form.room.id_for_label }} {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+    .room-dropdown-item {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        transition: background-color 0.15s;
+    }
+    .room-dropdown-item:hover {
+        background-color: #F3F4F6;
+    }
+    .room-dropdown-item.selected {
+        background-color: #DBEAFE;
+        font-weight: 600;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('room-search');
+    const dropdown = document.getElementById('room-dropdown');
+    const hiddenSelect = document.getElementById('{{ form.room.id_for_label }}');
+
+    // Get all room options from the hidden select
+    const roomOptions = Array.from(hiddenSelect.options)
+        .filter(opt => opt.value) // Exclude empty option
+        .map(opt => ({
+            value: opt.value,
+            text: opt.text
+        }));
+
+    // Set initial value if editing
+    if (hiddenSelect.value) {
+        const selectedOption = roomOptions.find(opt => opt.value === hiddenSelect.value);
+        if (selectedOption) {
+            searchInput.value = selectedOption.text;
+        }
+    }
+
+    // Filter and display rooms
+    function filterRooms(query) {
+        if (query.length < 3) {
+            dropdown.classList.add('hidden');
+            return;
+        }
+
+        const filtered = roomOptions.filter(room =>
+            room.text.toLowerCase().includes(query.toLowerCase())
+        );
+
+        if (filtered.length === 0) {
+            dropdown.innerHTML = '<div class="p-4 text-gray-500 text-sm">No rooms found</div>';
+            dropdown.classList.remove('hidden');
+            return;
+        }
+
+        dropdown.innerHTML = filtered.map(room => `
+            <div class="room-dropdown-item ${hiddenSelect.value === room.value ? 'selected' : ''}"
+                 data-value="${room.value}"
+                 data-text="${room.text}">
+                ${room.text}
+            </div>
+        `).join('');
+
+        dropdown.classList.remove('hidden');
+
+        // Add click handlers to dropdown items
+        dropdown.querySelectorAll('.room-dropdown-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const value = this.dataset.value;
+                const text = this.dataset.text;
+
+                // Update hidden select
+                hiddenSelect.value = value;
+
+                // Update search input
+                searchInput.value = text;
+
+                // Hide dropdown
+                dropdown.classList.add('hidden');
+            });
+        });
+    }
+
+    // Search input event
+    searchInput.addEventListener('input', function() {
+        filterRooms(this.value);
+    });
+
+    // Click outside to close
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+
+    // Focus on search input to show dropdown if query exists
+    searchInput.addEventListener('focus', function() {
+        if (this.value.length >= 3) {
+            filterRooms(this.value);
+        }
+    });
+});
+</script>
+{% endblock %}

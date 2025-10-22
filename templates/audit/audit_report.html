@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block title %}Audit Report - Kurutracker{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .animate-slideIn {
+        animation: slideIn 0.6s ease-out;
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.5s ease-out;
+    }
+    .stat-bar {
+        transition: width 1s ease-out;
+    }
+</style>
+
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-8 px-4">
+    <div class="max-w-7xl mx-auto space-y-8">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl shadow-2xl p-8 text-white animate-fadeIn">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2">Audit Report</h1>
+                    <p class="text-purple-100 text-lg">Comprehensive system inventory analysis and statistics</p>
+                    <p class="text-purple-200 text-sm mt-2">Report Period: Last {{ days }} days (since {{ start_date|date:"M d, Y" }})</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="?days=7" class="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg font-semibold transition-all {% if days == 7 %}ring-2 ring-white{% endif %}">
+                        7 Days
+                    </a>
+                    <a href="?days=30" class="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg font-semibold transition-all {% if days == 30 %}ring-2 ring-white{% endif %}">
+                        30 Days
+                    </a>
+                    <a href="?days=90" class="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg font-semibold transition-all {% if days == 90 %}ring-2 ring-white{% endif %}">
+                        90 Days
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fadeIn">
+            <div class="bg-white rounded-2xl shadow-xl p-6 border-t-4 border-blue-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-semibold uppercase">Total Items</p>
+                        <p class="text-4xl font-bold text-gray-900 mt-2">{{ total_items }}</p>
+                    </div>
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            {% for status_label, status_data in status_counts.items %}
+            <div class="bg-white rounded-2xl shadow-xl p-6 border-t-4
+                {% if 'Normal' in status_label %}border-green-500
+                {% elif 'Damaged' in status_label %}border-yellow-500
+                {% elif 'Repair' in status_label %}border-orange-500
+                {% elif 'Lost' in status_label %}border-red-500
+                {% else %}border-blue-500{% endif %}">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-semibold uppercase">{{ status_label }}</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-2">{{ status_data.count }}</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ status_data.percentage }}%</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center
+                        {% if 'Normal' in status_label %}bg-green-100
+                        {% elif 'Damaged' in status_label %}bg-yellow-100
+                        {% elif 'Repair' in status_label %}bg-orange-100
+                        {% elif 'Lost' in status_label %}bg-red-100
+                        {% else %}bg-blue-100{% endif %}">
+                        <span class="text-2xl font-bold
+                            {% if 'Normal' in status_label %}text-green-600
+                            {% elif 'Damaged' in status_label %}text-yellow-600
+                            {% elif 'Repair' in status_label %}text-orange-600
+                            {% elif 'Lost' in status_label %}text-red-600
+                            {% else %}text-blue-600{% endif %}">
+                            {{ status_data.percentage|floatformat:0 }}%
+                        </span>
+                    </div>
+                </div>
+                <!-- Progress Bar -->
+                <div class="mt-4 bg-gray-200 rounded-full h-2">
+                    <div class="stat-bar h-2 rounded-full
+                        {% if 'Normal' in status_label %}bg-green-500
+                        {% elif 'Damaged' in status_label %}bg-yellow-500
+                        {% elif 'Repair' in status_label %}bg-orange-500
+                        {% elif 'Lost' in status_label %}bg-red-500
+                        {% else %}bg-blue-500{% endif %}"
+                        style="width: {{ status_data.percentage }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Category Statistics -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-slideIn">
+                <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white">Items by Category</h2>
+                </div>
+                <div class="p-6 space-y-3">
+                    {% for cat in category_stats %}
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-900">{{ cat.name }}</p>
+                            <div class="mt-2 bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full" style="width: {{ cat.percentage }}%"></div>
+                            </div>
+                        </div>
+                        <span class="ml-4 text-2xl font-bold text-purple-600">{{ cat.item_count }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-500 text-center py-8">No categories found</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Room Statistics -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-slideIn">
+                <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white">Top Rooms (by item count)</h2>
+                </div>
+                <div class="p-6 space-y-3">
+                    {% for room in room_stats %}
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-900">{{ room.room.code }}</p>
+                            {% if room.room.description %}
+                            <p class="text-sm text-gray-500">{{ room.room.description }}</p>
+                            {% endif %}
+                            <div class="mt-2 bg-gray-200 rounded-full h-2">
+                                <div class="bg-indigo-500 h-2 rounded-full" style="width: {{ room.percentage }}%"></div>
+                            </div>
+                        </div>
+                        <span class="ml-4 text-2xl font-bold text-indigo-600">{{ room.item_count }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-500 text-center py-8">No room data available</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Owner Statistics -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-fadeIn">
+            <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
+                <h2 class="text-xl font-bold text-white">Top Item Holders</h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {% for owner in owner_stats %}
+                    <div class="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border-2 border-blue-200 hover:border-blue-400 transition-all">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                {{ owner.owner.email.0|upper }}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-gray-900 truncate">{{ owner.owner.get_full_name }}</p>
+                                <p class="text-sm text-gray-500 truncate">{{ owner.owner.email }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-center justify-between">
+                            <span class="text-3xl font-bold text-blue-600">{{ owner.item_count }}</span>
+                            <span class="text-sm text-gray-500">items</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="col-span-4 text-gray-500 text-center py-8">No data available</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Needing Attention -->
+        {% if items_needing_attention %}
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-fadeIn">
+            <div class="bg-gradient-to-r from-orange-600 to-red-600 px-6 py-4">
+                <h2 class="text-xl font-bold text-white flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    Items Needing Attention
+                </h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Asset ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Room</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Owner</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in items_needing_attention %}
+                        <tr class="hover:bg-orange-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                                <a href="{% url 'items:item_detail' item.pk %}" class="text-blue-600 hover:text-blue-800">
+                                    {{ item.asset_id }}
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">{{ item.name }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ item.category.name }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">
+                                {% if item.room %}{{ item.room.code }}{% else %}—{% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ item.current_owner.email }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                    {% if item.status == 'DAMAGED' %}bg-yellow-100 text-yellow-800
+                                    {% elif item.status == 'LOST' %}bg-red-100 text-red-800
+                                    {% elif item.status == 'REPAIR' %}bg-orange-100 text-orange-800
+                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ item.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                <a href="{% url 'audit:audit_checklist' %}?search={{ item.asset_id }}"
+                                   class="text-blue-600 hover:text-blue-800 font-semibold">
+                                    Review →
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recent Transfers -->
+        {% if recent_transfers %}
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-fadeIn">
+            <div class="bg-gradient-to-r from-green-600 to-teal-600 px-6 py-4">
+                <h2 class="text-xl font-bold text-white">Recent Transfers (Last {{ days }} days)</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Item</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">From</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">To</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Type</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for transfer in recent_transfers %}
+                        <tr class="hover:bg-green-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ transfer.transferred_at|date:"M d, Y H:i" }}
+                            </td>
+                            <td class="px-6 py-4 text-sm font-semibold text-gray-900">
+                                <a href="{% url 'items:item_detail' transfer.item.pk %}" class="text-blue-600 hover:text-blue-800">
+                                    {{ transfer.item.asset_id }} - {{ transfer.item.name }}
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ transfer.from_user.email }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ transfer.to_user.email }}</td>
+                            <td class="px-6 py-4 text-sm">
+                                {% if transfer.is_forced %}
+                                <span class="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-semibold">
+                                    Forced
+                                </span>
+                                {% else %}
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                                    Normal
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Back Button -->
+        <div class="flex justify-center">
+            <a href="{% url 'audit:audit_checklist' %}"
+               class="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Audit Checklist
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

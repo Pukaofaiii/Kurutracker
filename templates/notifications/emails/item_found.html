@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #10B981, #059669); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }
+        .button { display: inline-block; padding: 12px 30px; background: #10B981; color: white; text-decoration: none; border-radius: 8px; margin: 20px 0; }
+        .footer { text-align: center; margin-top: 30px; padding: 20px; color: #6b7280; font-size: 12px; }
+        .success-box { background: #D1FAE5; border-left: 4px solid #10B981; padding: 20px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Good News - Item Found!</h1>
+        </div>
+        <div class="content">
+            <p>Hello {{ recipient.get_full_name }},</p>
+
+            <p>Great news! Your lost item has been recovered:</p>
+
+            <div style="background: white; padding: 20px; border-left: 4px solid #10B981; margin: 20px 0;">
+                <p><strong>Item:</strong> {{ item.asset_id }} - {{ item.name }}</p>
+                <p><strong>New Status:</strong> {{ new_status }}</p>
+                {% if notes %}
+                <p><strong>Recovery Notes:</strong> {{ notes }}</p>
+                {% endif %}
+            </div>
+
+            <div class="success-box">
+                <p style="margin: 0;"><strong>Item Condition Assessment:</strong></p>
+                <p style="margin: 10px 0;">
+                    The item has been inspected and assessed as <strong>{{ new_status }}</strong>.
+                    {% if new_status == 'Normal' %}
+                    The item is in good condition and ready for use.
+                    {% elif new_status == 'Damaged' %}
+                    The item has sustained damage and may require repair.
+                    {% elif new_status == 'Repair' %}
+                    The item requires repair before it can be used again.
+                    {% endif %}
+                </p>
+            </div>
+
+            <p>The item remains assigned to you. Please contact staff if you have any questions about its condition or next steps.</p>
+
+            <a href="{{ site_url }}{% url 'items:item_list' %}" class="button">View My Items</a>
+
+            <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
+                <strong>Note:</strong> This is an automated notification from the audit system.
+            </p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2025 Kurutracker - Asset Management System</p>
+            <p>This is an automated email. Please do not reply.</p>
+        </div>
+    </div>
+</body>
+</html>
