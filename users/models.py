@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.core.exceptions import ValidationError
+from .validators import phone_validator
 
 
 class UserManager(BaseUserManager):
@@ -54,7 +55,8 @@ class User(AbstractUser):
         max_length=20,
         blank=True,
         null=True,
-        verbose_name='Phone Number'
+        verbose_name='Phone Number',
+        validators=[phone_validator]
     )
     department = models.CharField(
         max_length=100,
@@ -66,6 +68,11 @@ class User(AbstractUser):
         default=False,
         verbose_name='Auditor Permission',
         help_text='User can access audit checklist and mark items as damaged/lost'
+    )
+    disable_expiration_emails = models.BooleanField(
+        default=False,
+        verbose_name='Disable Expiration Warning Emails',
+        help_text='Opt out of email notifications for expiring requests (web notifications will still be sent)'
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -79,6 +86,13 @@ class User(AbstractUser):
         verbose_name = 'User'
         verbose_name_plural = 'Users'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['email']),
+            models.Index(fields=['role']),
+            models.Index(fields=['is_active']),
+            models.Index(fields=['is_auditor']),
+            models.Index(fields=['role', 'is_active']),  # Composite index for common queries
+        ]
 
     def __str__(self):
         return f"{self.get_full_name() or self.email} ({self.get_role_display()})"
@@ -133,6 +147,55 @@ class User(AbstractUser):
     def can_force_transfer(self):
         """Check if user can force transfer items without approval."""
         return self.role == self.Role.MANAGER
+
+    def can_audit_item(self, item):
+        """
+        Check if user can audit a specific item.
+
+        Staff and managers can audit any item.
+        Auditors can only audit items they're assigned to via AuditorAssignment.
+
+        Args:
+            item: Item instance to check audit permission for
+
+        Returns:
+            bool: True if user can audit this item, False otherwise
+        """
+        # Staff and managers can audit any item
+        if self.role in [self.Role.STAFF, self.Role.MANAGER]:
+            return True
+
+        # Non-auditors cannot audit
+        if not self.is_auditor:
+            return False
+
+        # Import here to avoid circular import
+        from audit.models import AuditorAssignment
+
+        # Check for global auditor permission
+        if AuditorAssignment.objects.filter(
+            auditor=self,
+            is_global=True
+        ).exists():
+            return True
+
+        # Check location-based permission
+        if item.current_location and AuditorAssignment.objects.filter(
+            auditor=self,
+            location=item.current_location
+        ).exists():
+            return True
+
+        # Check department-based permission
+        if item.current_owner and item.current_owner.department:
+            if AuditorAssignment.objects.filter(
+                auditor=self,
+                department=item.current_owner.department
+            ).exists():
+                return True
+
+        # No permission found
+        return False
 
     def has_items(self):
         """Check if user currently holds any items."""

@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block title %}removed items - KURU Tracker{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-kuru-brown">removed items</h1>
+            <p class="text-gray-600 mt-1">manage items marked as removed from system</p>
+        </div>
+        <a href="{% url 'items:item_list' %}"
+           class="px-6 py-3 bg-kuru-blue text-white rounded-lg hover:bg-kuru-blue/90 transition-all duration-200 shadow-md hover:shadow-lg font-semibold flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            back to items
+        </a>
+    </div>
+
+    <!-- Hidden CSRF Form for Bulk Operations -->
+    <form id="csrf-form" style="display: none;">
+        {% csrf_token %}
+    </form>
+
+    <!-- Bulk Restore Toolbar (Hidden by default) -->
+    <div id="bulk-toolbar" class="hidden bg-kuru-success/10 border-2 border-kuru-success rounded-xl p-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <span id="selection-count" class="text-kuru-brown font-bold">0 items selected</span>
+                <button type="button" onclick="clearSelection()" class="text-sm text-gray-600 hover:text-kuru-brown underline">
+                    clear selection
+                </button>
+            </div>
+            <div class="flex space-x-3">
+                <button type="button" onclick="bulkRestore()" class="px-4 py-2 bg-kuru-success text-white rounded-lg hover:bg-kuru-success/90 transition-colors duration-200 font-semibold shadow-sm">
+                    restore selected
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Removed Items Table -->
+    {% if items %}
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-kuru-brown">
+                <tr>
+                    <th scope="col" class="px-6 py-4 text-left">
+                        <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)"
+                               class="w-4 h-4 text-kuru-success border-gray-300 rounded focus:ring-kuru-success cursor-pointer">
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        image
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        asset ID
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        name
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        category
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        owner
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        updated
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
+                        actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for item in items %}
+                <tr class="hover:bg-kuru-beige transition-colors duration-150">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" class="item-checkbox w-4 h-4 text-kuru-success border-gray-300 rounded focus:ring-kuru-success cursor-pointer"
+                               value="{{ item.pk }}" onchange="updateBulkToolbar()">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-12 h-12 object-cover rounded-lg border-2 border-gray-200">
+                        {% else %}
+                        <div class="w-12 h-12 bg-kuru-beige rounded-lg flex items-center justify-center border-2 border-gray-200">
+                            <svg class="w-6 h-6 text-kuru-brown/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-bold text-kuru-brown">{{ item.asset_id }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-semibold text-gray-900">{{ item.name }}</div>
+                        {% if item.model %}
+                        <div class="text-xs text-gray-500">{{ item.model }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-600">{{ item.category.name|default:"—" }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-600">{{ item.current_owner.get_full_name|default:item.current_owner.email }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-600">{{ item.updated_at|date:"M d, Y" }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <a href="{% url 'items:restore_item' item.pk %}"
+                           class="inline-flex items-center px-3 py-1.5 bg-kuru-success text-white rounded-lg hover:bg-kuru-success/90 transition-colors duration-150 font-semibold text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            restore
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-xl shadow-md p-12 text-center">
+        <svg class="w-20 h-20 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h3 class="text-xl font-semibold text-kuru-brown mb-2">no removed items</h3>
+        <p class="text-gray-500 mb-6">all items are active in the system</p>
+        <a href="{% url 'items:item_list' %}"
+           class="inline-flex items-center px-6 py-3 bg-kuru-blue text-white rounded-lg hover:bg-kuru-blue/90 transition-all duration-200 font-semibold shadow-md">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            back to items
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Track selected items
+let selectedItems = new Set();
+
+// Toggle select all checkboxes
+function toggleSelectAll(checkbox) {
+    const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+    itemCheckboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+        if (checkbox.checked) {
+            selectedItems.add(cb.value);
+        } else {
+            selectedItems.delete(cb.value);
+        }
+    });
+    updateBulkToolbar();
+}
+
+// Update bulk toolbar visibility and count
+function updateBulkToolbar() {
+    const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+    const toolbar = document.getElementById('bulk-toolbar');
+    const countDisplay = document.getElementById('selection-count');
+    const selectAllCheckbox = document.getElementById('select-all');
+
+    // Update selectedItems set
+    selectedItems.clear();
+    itemCheckboxes.forEach(cb => {
+        if (cb.checked) {
+            selectedItems.add(cb.value);
+        }
+    });
+
+    // Update select-all checkbox state
+    if (selectAllCheckbox) {
+        const allChecked = Array.from(itemCheckboxes).every(cb => cb.checked);
+        const someChecked = Array.from(itemCheckboxes).some(cb => cb.checked);
+        selectAllCheckbox.checked = allChecked;
+        selectAllCheckbox.indeterminate = someChecked && !allChecked;
+    }
+
+    // Show/hide toolbar
+    const count = selectedItems.size;
+    if (count > 0) {
+        toolbar.classList.remove('hidden');
+        countDisplay.textContent = `${count} item${count !== 1 ? 's' : ''} selected`;
+    } else {
+        toolbar.classList.add('hidden');
+    }
+}
+
+// Clear all selections
+function clearSelection() {
+    const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+    const selectAllCheckbox = document.getElementById('select-all');
+
+    itemCheckboxes.forEach(cb => cb.checked = false);
+    if (selectAllCheckbox) selectAllCheckbox.checked = false;
+    selectedItems.clear();
+    updateBulkToolbar();
+}
+
+// Get CSRF token from hidden form
+function getCsrfToken() {
+    const csrfForm = document.getElementById('csrf-form');
+    if (csrfForm) {
+        const csrfInput = csrfForm.querySelector('[name=csrfmiddlewaretoken]');
+        return csrfInput ? csrfInput.value : '';
+    }
+    return '';
+}
+
+// Bulk restore
+function bulkRestore() {
+    if (selectedItems.size === 0) {
+        alert('Please select items to restore');
+        return;
+    }
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{% url "items:bulk_restore" %}';
+
+    const csrfToken = getCsrfToken();
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+
+    selectedItems.forEach(itemId => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'item_ids';
+        input.value = itemId;
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+{% endblock %}

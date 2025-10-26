@@ -3,52 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        body { font-family: 'Poppins', Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #F59E0B, #EF4444); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-        .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }
-        .button { display: inline-block; padding: 12px 30px; background: #F59E0B; color: white; text-decoration: none; border-radius: 8px; margin: 20px 0; }
-        .footer { text-align: center; margin-top: 30px; padding: 20px; color: #6b7280; font-size: 12px; }
-        .warning-box { background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 20px; margin: 20px 0; }
+        .header { background: #F9DC5C; color: #333; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #F5EFE7; padding: 30px; border: 1px solid #e5e7eb; }
+        .button { display: inline-block; padding: 12px 30px; background: #F9DC5C; color: #333; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: 600; }
+        .footer { text-align: center; margin-top: 30px; padding: 20px; color: #7A6652; font-size: 12px; }
+        .warning-box { background: white; border-left: 4px solid #F9DC5C; padding: 20px; margin: 20px 0; border-radius: 8px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>⚠️ Item Marked as Damaged</h1>
+            <h1 style="margin: 0; font-weight: 700;">⚠️ item marked as damaged</h1>
         </div>
         <div class="content">
-            <p>Hello {{ recipient.get_full_name }},</p>
+            <p>hello {{ recipient.get_full_name }},</p>
 
-            <p>During a routine audit, one of your items has been identified as damaged:</p>
+            <p>during a routine audit, one of your items has been identified as damaged:</p>
 
-            <div style="background: white; padding: 20px; border-left: 4px solid #F59E0B; margin: 20px 0;">
-                <p><strong>Item:</strong> {{ item.asset_id }} - {{ item.name }}</p>
-                <p><strong>Status:</strong> Pending Inspection</p>
+            <div style="background: white; padding: 20px; border-left: 4px solid #F9DC5C; margin: 20px 0; border-radius: 8px;">
+                <p style="margin: 0 0 10px 0;"><strong>item:</strong> {{ item.asset_id }} - {{ item.name }}</p>
+                <p style="margin: 0 0 10px 0;"><strong>status:</strong> pending inspection</p>
                 {% if notes %}
-                <p><strong>Auditor Notes:</strong> {{ notes }}</p>
+                <p style="margin: 0;"><strong>auditor notes:</strong> {{ notes }}</p>
                 {% endif %}
             </div>
 
             <div class="warning-box">
-                <p style="margin: 0;"><strong>What happens next:</strong></p>
+                <p style="margin: 0;"><strong>what happens next:</strong></p>
                 <ul style="margin: 10px 0;">
-                    <li>A return request has been automatically created</li>
-                    <li>Please review and respond to the return request</li>
-                    <li>Staff will inspect the item upon return</li>
-                    <li>Final status will be determined after inspection</li>
+                    <li>a return request has been automatically created</li>
+                    <li>please review and respond to the return request</li>
+                    <li>staff will inspect the item upon return</li>
+                    <li>final status will be determined after inspection</li>
                 </ul>
             </div>
 
-            <a href="{{ site_url }}{% url 'transfers:pending_requests' %}" class="button">View Return Request</a>
+            <a href="{{ site_url }}{% url 'transfers:pending_requests' %}" class="button" style="display: inline-block; padding: 12px 30px; background: #F9DC5C; color: #333; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: 600;">view return request</a>
 
-            <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-                <strong>Note:</strong> This is an automated notification from the audit system.
+            <p style="margin-top: 30px; font-size: 14px; color: #7A6652; background: white; padding: 15px; border-radius: 8px;">
+                <strong>note:</strong> this is an automated notification from the audit system.
             </p>
         </div>
         <div class="footer">
-            <p>&copy; 2025 Kurutracker - Asset Management System</p>
-            <p>This is an automated email. Please do not reply.</p>
+            <p>&copy; 2025 kuru tracker - asset management system</p>
+            <p>this is an automated email. please do not reply.</p>
         </div>
     </div>
 </body>

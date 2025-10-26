@@ -20,7 +20,8 @@ class Notification(models.Model):
 
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,  # Preserve notification history even if user is deleted
+        null=True,
         related_name='notifications',
         verbose_name='Recipient'
     )
@@ -38,7 +39,7 @@ class Notification(models.Model):
     )
     related_request = models.ForeignKey(
         'transfers.TransferRequest',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,  # Preserve notification if request is deleted
         blank=True,
         null=True,
         related_name='notifications',
@@ -46,7 +47,7 @@ class Notification(models.Model):
     )
     related_item = models.ForeignKey(
         'items.Item',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,  # Preserve notification if item is deleted
         blank=True,
         null=True,
         related_name='notifications',
@@ -57,6 +58,7 @@ class Notification(models.Model):
         verbose_name='Read'
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = 'Notification'

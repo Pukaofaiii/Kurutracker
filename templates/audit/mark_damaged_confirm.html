@@ -1,52 +1,75 @@
 {% extends 'base.html' %}
 
-{% block title %}Mark as Damaged - Kurutracker{% endblock %}
+{% block title %}mark as damaged - KURU Tracker{% endblock %}
 
 {% block content %}
+<style>
+    textarea:focus {
+        outline: none;
+        border-color: #F9DC5C;
+        box-shadow: 0 0 0 3px rgba(249, 220, 92, 0.1);
+    }
+</style>
+
 <div class="max-w-2xl mx-auto">
-    <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
-        <div class="bg-gradient-to-r from-yellow-600 to-orange-600 px-8 py-12 text-center text-white">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-kuru-yellow px-8 py-12 text-center text-white">
             <svg class="w-20 h-20 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
-            <h1 class="text-3xl font-bold mb-2">Mark Item as Damaged</h1>
-            <p class="text-yellow-100">This will create a return request for inspection</p>
+            <h1 class="text-3xl font-bold mb-2">mark item as damaged</h1>
+            <p class="text-white/90">this will create a return request for inspection</p>
         </div>
 
         <div class="p-8">
             <div class="mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">Item Information</h2>
-                <div class="bg-gray-50 rounded-lg p-6">
-                    <p class="text-lg font-bold text-gray-900">{{ item.name }}</p>
+                <h2 class="text-xl font-bold text-kuru-brown mb-4">item information</h2>
+                <div class="bg-kuru-beige rounded-xl p-6 border-2 border-kuru-brown/10">
+                    <p class="text-lg font-bold text-kuru-brown">{{ item.name }}</p>
                     <p class="text-gray-600">{{ item.asset_id }}</p>
-                    <p class="mt-2"><span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-bold">{{ item.get_status_display }}</span></p>
-                    <p class="mt-4 text-sm"><strong>Current Owner:</strong> {{ item.current_owner.email }}</p>
+                    <p class="mt-2">
+                        <span class="inline-flex items-center px-3 py-1 rounded text-xs font-semibold
+                            {% if item.status == 'NORMAL' %}bg-kuru-success/20 text-kuru-success
+                            {% elif item.status == 'DAMAGED' %}bg-kuru-yellow/20 text-kuru-yellow
+                            {% elif item.status == 'REPAIR' %}bg-kuru-orange/20 text-kuru-orange
+                            {% elif item.status == 'LOST' %}bg-kuru-danger/20 text-kuru-danger
+                            {% else %}bg-kuru-blue/20 text-kuru-blue{% endif %}">
+                            {{ item.get_status_display }}
+                        </span>
+                    </p>
+                    <p class="mt-4 text-sm text-gray-700"><span class="font-bold text-kuru-brown">current owner:</span> {{ item.current_owner.email }}</p>
                 </div>
             </div>
 
-            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded mb-6">
-                <p class="font-bold text-yellow-800">What will happen:</p>
-                <ul class="text-sm text-yellow-700 mt-2 space-y-1">
-                    <li>• Item status will be set to "Pending Inspection"</li>
-                    <li>• A return request will be automatically created</li>
-                    <li>• Owner will be notified via email</li>
-                    <li>• Staff will inspect the item upon return</li>
+            <div class="bg-kuru-yellow/10 border-l-4 border-kuru-yellow p-4 rounded-xl mb-6">
+                <p class="font-bold text-kuru-brown">what will happen:</p>
+                <ul class="text-sm text-gray-700 mt-2 space-y-1">
+                    <li>• item status will be set to "pending inspection"</li>
+                    <li>• a return request will be automatically created</li>
+                    <li>• owner will be notified via email</li>
+                    <li>• staff will inspect the item upon return</li>
                 </ul>
             </div>
 
             <form method="post">
                 {% csrf_token %}
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Auditor Notes (Optional)</label>
-                    <textarea name="notes" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500" placeholder="Describe the damage..."></textarea>
+                    <label class="block text-sm font-bold text-kuru-brown mb-2">auditor notes (optional)</label>
+                    <textarea name="notes" rows="4" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg" placeholder="describe the damage..."></textarea>
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <a href="{% url 'audit:audit_checklist' %}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-all">
-                        Cancel
+                <div class="flex items-center justify-between pt-6 border-t-2 border-gray-100">
+                    <a href="{% url 'audit:audit_checklist' %}" class="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        cancel
                     </a>
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-lg font-bold hover:from-yellow-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl">
-                        Mark as Damaged
+                    <button type="submit" class="inline-flex items-center px-8 py-3 bg-kuru-yellow text-white rounded-lg font-bold hover:bg-kuru-yellow/90 transition-all duration-200 shadow-md hover:shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        mark as damaged
                     </button>
                 </div>
             </form>

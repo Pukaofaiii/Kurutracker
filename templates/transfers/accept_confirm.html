@@ -1,55 +1,96 @@
 {% extends 'base.html' %}
 
-{% block title %}Accept Transfer - Kurutracker{% endblock %}
+{% block title %}accept transfer - KURU Tracker{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Accept Transfer Request</h2>
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-kuru-success px-6 py-4 border-b-2 border-kuru-success/20">
+            <h2 class="text-xl font-bold text-white">accept transfer request</h2>
         </div>
 
         <div class="p-8">
             <div class="flex items-start mb-6">
-                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-12 h-12 bg-kuru-success/10 rounded-full flex items-center justify-center mr-4">
+                    <svg class="w-6 h-6 text-kuru-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
                 <div class="flex-1">
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">Confirm Transfer Acceptance</h3>
-                    <p class="text-gray-600 mb-4">By accepting this request, you will become the owner of this item.</p>
+                    <h3 class="text-lg font-bold text-kuru-brown mb-2">confirm transfer acceptance</h3>
+                    <p class="text-gray-600 mb-4">by accepting this request, you will become the owner of this item.</p>
 
-                    <div class="bg-gray-50 rounded-lg p-4 border-2 border-gray-200 space-y-2">
-                        <p class="text-sm text-gray-700"><span class="font-medium">Type:</span>
+                    <div class="bg-kuru-beige rounded-xl p-4 border-2 border-kuru-brown/10 space-y-2">
+                        <p class="text-sm text-kuru-brown"><span class="font-semibold">type:</span>
                             <span class="px-2 py-0.5 rounded text-xs font-medium
-                                {% if transfer.request_type == 'ASSIGN' %}bg-blue-100 text-blue-800
-                                {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                {% if transfer.request_type == 'ASSIGN' %}bg-kuru-green/20 text-kuru-green
+                                {% else %}bg-kuru-orange/20 text-kuru-orange{% endif %}">
                                 {{ transfer.get_request_type_display }}
                             </span>
                         </p>
-                        <p class="text-sm text-gray-700"><span class="font-medium">Item:</span> {{ transfer.item.name }}</p>
-                        <p class="text-sm text-gray-700"><span class="font-medium">Asset ID:</span> {{ transfer.item.asset_id }}</p>
-                        <p class="text-sm text-gray-700"><span class="font-medium">From:</span> {{ transfer.from_user.email }}</p>
+                        <p class="text-sm text-kuru-brown"><span class="font-semibold">item:</span> {{ transfer.item.name }}</p>
+                        <p class="text-sm text-kuru-brown"><span class="font-semibold">asset ID:</span> {{ transfer.item.asset_id }}</p>
+                        <p class="text-sm text-kuru-brown"><span class="font-semibold">from:</span> {{ transfer.from_user.email }}</p>
                         {% if transfer.notes %}
-                        <p class="text-sm text-gray-700"><span class="font-medium">Notes:</span> {{ transfer.notes }}</p>
+                        <p class="text-sm text-kuru-brown"><span class="font-semibold">notes:</span> {{ transfer.notes }}</p>
                         {% endif %}
                     </div>
                 </div>
             </div>
 
-            <form method="post" class="flex space-x-4">
+            <form method="post" class="space-y-6">
                 {% csrf_token %}
-                <button type="submit"
-                        class="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-                    Yes, Accept Transfer
-                </button>
-                <a href="{% url 'transfers:pending_requests' %}"
-                   class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">
-                    Cancel
-                </a>
+
+                <div class="bg-kuru-blue/10 border-l-4 border-kuru-blue p-4 rounded-xl">
+                    <div class="flex">
+                        <svg class="w-5 h-5 text-kuru-blue mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-semibold text-kuru-brown">location required</p>
+                            <p class="text-sm text-gray-700 mt-1">please select where you will keep this item.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="{{ form.current_location.id_for_label }}" class="block text-sm font-semibold text-kuru-brown mb-2">
+                        current location <span class="text-kuru-danger">*</span>
+                    </label>
+                    {{ form.current_location }}
+                    {% if form.current_location.errors %}
+                    <p class="mt-1 text-sm text-kuru-danger">{{ form.current_location.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-2 text-sm text-gray-500">select the room where you will store this item</p>
+                </div>
+
+                <div class="flex space-x-4 pt-4 border-t border-gray-200">
+                    <button type="submit"
+                            class="flex-1 px-6 py-3 bg-kuru-success text-white rounded-lg hover:bg-kuru-success/90 transition-all duration-200 shadow-md hover:shadow-lg font-semibold">
+                        yes, accept transfer
+                    </button>
+                    <a href="{% url 'transfers:pending_requests' %}"
+                       class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">
+                        cancel
+                    </a>
+                </div>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #E5E7EB;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+    }
+    select:focus {
+        outline: none;
+        border-color: #489FB5;
+    }
+</style>
 {% endblock %}

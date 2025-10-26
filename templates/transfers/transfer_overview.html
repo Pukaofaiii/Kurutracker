@@ -1,34 +1,34 @@
 {% extends 'base.html' %}
 
-{% block title %}Transfer Overview - Kurutracker{% endblock %}
+{% block title %}transfer overview - KURU Tracker{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-900">Transfer Overview</h1>
+        <h1 class="text-3xl font-bold text-kuru-brown">transfer overview</h1>
     </div>
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Pending to Accept -->
-        <div class="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl shadow-xl p-6 text-white">
+        <div class="bg-kuru-yellow rounded-xl shadow-md p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium opacity-90">Pending (To Accept)</p>
+                    <p class="text-sm font-medium opacity-90">pending (to accept)</p>
                     <p class="text-4xl font-bold mt-2">{{ pending_to_accept }}</p>
                 </div>
                 <svg class="w-12 h-12 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <a href="{% url 'transfers:pending_requests' %}" class="mt-4 block text-sm font-semibold hover:underline">View Pending →</a>
+            <a href="{% url 'transfers:pending_requests' %}" class="mt-4 block text-sm font-semibold hover:underline">view pending →</a>
         </div>
 
         <!-- Pending Sent -->
-        <div class="bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl shadow-xl p-6 text-white">
+        <div class="bg-kuru-blue rounded-xl shadow-md p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium opacity-90">Pending (Sent)</p>
+                    <p class="text-sm font-medium opacity-90">pending (sent)</p>
                     <p class="text-4xl font-bold mt-2">{{ pending_sent }}</p>
                 </div>
                 <svg class="w-12 h-12 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,33 +38,33 @@
         </div>
 
         <!-- Total Completed -->
-        <div class="bg-gradient-to-br from-green-400 to-teal-500 rounded-2xl shadow-xl p-6 text-white">
+        <div class="bg-kuru-success rounded-xl shadow-md p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium opacity-90">Total Completed</p>
+                    <p class="text-sm font-medium opacity-90">total completed</p>
                     <p class="text-4xl font-bold mt-2">{{ total_completed }}</p>
                 </div>
                 <svg class="w-12 h-12 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <a href="{% url 'transfers:transfer_history' %}" class="mt-4 block text-sm font-semibold hover:underline">View History →</a>
+            <a href="{% url 'transfers:transfer_history' %}" class="mt-4 block text-sm font-semibold hover:underline">view history →</a>
         </div>
     </div>
 
     <!-- Recent Activity -->
-    <div class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Transfer Activity</h2>
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-xl font-bold text-kuru-brown mb-4">recent transfer activity</h2>
         {% if recent_logs %}
             <div class="space-y-3">
                 {% for log in recent_logs %}
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-kuru-beige/50 transition">
                     <div class="flex items-center space-x-4">
-                        <div class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center text-white font-bold">
+                        <div class="w-10 h-10 bg-kuru-green rounded-lg flex items-center justify-center text-white font-bold">
                             {% if log.is_forced %}⚡{% else %}📦{% endif %}
                         </div>
                         <div>
-                            <p class="font-semibold text-gray-900">{{ log.item.name }}</p>
+                            <p class="font-semibold text-kuru-brown">{{ log.item.name }}</p>
                             <p class="text-sm text-gray-600">
                                 {{ log.from_user.email }} → {{ log.to_user.email }}
                             </p>
@@ -78,22 +78,22 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p class="text-gray-500 text-center py-8">No recent transfer activity</p>
+            <p class="text-gray-500 text-center py-8">no recent transfer activity</p>
         {% endif %}
     </div>
 
     <!-- Quick Actions -->
     <div class="flex flex-wrap gap-4">
         {% if user.is_staff_or_manager %}
-        <a href="{% url 'transfers:create_transfer' %}" class="px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-bold hover:shadow-xl transition">
-            Create Transfer Request
+        <a href="{% url 'transfers:create_transfer' %}" class="px-6 py-3 bg-kuru-green text-white rounded-lg font-semibold hover:bg-kuru-green/90 shadow-md hover:shadow-lg transition">
+            create transfer request
         </a>
         {% endif %}
-        <a href="{% url 'transfers:pending_requests' %}" class="px-6 py-3 bg-white text-primary border-2 border-primary rounded-xl font-bold hover:bg-primary hover:text-white transition">
-            View Pending Requests
+        <a href="{% url 'transfers:pending_requests' %}" class="px-6 py-3 bg-white text-kuru-green border-2 border-kuru-green rounded-lg font-semibold hover:bg-kuru-green hover:text-white transition shadow-sm">
+            view pending requests
         </a>
-        <a href="{% url 'transfers:transfer_history' %}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition">
-            View Full History
+        <a href="{% url 'transfers:transfer_history' %}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition shadow-sm">
+            view full history
         </a>
     </div>
 </div>

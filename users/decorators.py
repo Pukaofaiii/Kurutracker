@@ -120,3 +120,27 @@ def auditor_required(view_func):
             )
             raise PermissionDenied
     return wrapper
+
+
+def auditor_or_manager_required(view_func):
+    """
+    Decorator for views that require auditor permission or manager role.
+    Used for sensitive audit functions like reports.
+
+    Usage:
+        @auditor_or_manager_required
+        def audit_report(request):
+            ...
+    """
+    @wraps(view_func)
+    @login_required
+    def wrapper(request, *args, **kwargs):
+        if request.user.is_auditor or request.user.is_manager:
+            return view_func(request, *args, **kwargs)
+        else:
+            messages.error(
+                request,
+                "Access denied. You need auditor permission or manager role to access this page."
+            )
+            raise PermissionDenied
+    return wrapper

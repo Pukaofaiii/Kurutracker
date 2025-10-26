@@ -17,6 +17,7 @@ class ItemCategory(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = 'Item Category'
@@ -161,6 +162,9 @@ class Item(models.Model):
         indexes = [
             models.Index(fields=['asset_id']),
             models.Index(fields=['current_owner', 'status']),
+            models.Index(fields=['category']),  # For category filtering
+            models.Index(fields=['status']),  # For status filtering
+            models.Index(fields=['date_acquired']),  # For date range queries
         ]
 
     def __str__(self):

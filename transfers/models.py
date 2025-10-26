@@ -18,6 +18,7 @@ class TransferRequest(models.Model):
         PENDING = 'PENDING', 'Pending'
         ACCEPTED = 'ACCEPTED', 'Accepted'
         REJECTED = 'REJECTED', 'Rejected'
+        EXPIRED = 'EXPIRED', 'Expired'
 
     # Request metadata
     request_type = models.CharField(
@@ -49,7 +50,7 @@ class TransferRequest(models.Model):
     # Item being transferred
     item = models.ForeignKey(
         'items.Item',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,  # Prevent item deletion if transfer requests exist
         related_name='transfer_requests',
         verbose_name='Item'
     )
@@ -87,6 +88,40 @@ class TransferRequest(models.Model):
         help_text='Request expires 7 days after creation'
     )
 
+    # Expiration tracking fields
+    original_item_status = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        verbose_name='Original Item Status',
+        help_text='Item status before PENDING_INSPECTION (for RETURN requests)'
+    )
+    expiration_extended_until = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name='Extended Until',
+        help_text='Admin-extended expiration deadline'
+    )
+    manually_expired_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='manually_expired_requests',
+        verbose_name='Manually Expired By',
+        help_text='Manager who manually expired this request'
+    )
+    warning_48h_sent = models.BooleanField(
+        default=False,
+        verbose_name='48-Hour Warning Sent',
+        help_text='Whether 48-hour expiration warning has been sent'
+    )
+    warning_24h_sent = models.BooleanField(
+        default=False,
+        verbose_name='24-Hour Warning Sent',
+        help_text='Whether 24-hour expiration warning has been sent'
+    )
+
     class Meta:
         verbose_name = 'Transfer Request'
         verbose_name_plural = 'Transfer Requests'
@@ -94,17 +129,41 @@ class TransferRequest(models.Model):
         indexes = [
             models.Index(fields=['status', 'to_user']),
             models.Index(fields=['item', 'status']),
+            models.Index(fields=['expires_at']),  # For expiration batch jobs
+            models.Index(fields=['from_user']),  # For user permission checks
+            models.Index(fields=['status', 'expires_at']),  # For expiration queries
+            models.Index(fields=['status', 'warning_48h_sent']),  # For warning queries
+            models.Index(fields=['status', 'warning_24h_sent']),  # For warning queries
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['item'],
+                condition=models.Q(status='PENDING'),
+                name='unique_pending_request_per_item'
+            )
         ]
 
     def __str__(self):
         return f"{self.get_request_type_display()}: {self.item.asset_id} from {self.from_user.email} to {self.to_user.email}"
 
     def save(self, *args, **kwargs):
-        """Set expires_at to 7 days from creation if not set."""
-        if not self.pk and not self.expires_at:
-            from django.utils import timezone
-            from datetime import timedelta
-            self.expires_at = timezone.now() + timedelta(days=7)
+        """
+        Set expires_at to 7 days from creation if not set.
+        For RETURN requests, capture original item status before PENDING_INSPECTION.
+        """
+        if not self.pk:
+            # Set expiration date if not already set
+            if not self.expires_at:
+                from django.utils import timezone
+                from datetime import timedelta
+                self.expires_at = timezone.now() + timedelta(days=7)
+
+            # For RETURN requests, capture original item status
+            if self.request_type == self.RequestType.RETURN and self.item:
+                # Store the status before it might be changed to PENDING_INSPECTION
+                if not self.original_item_status:
+                    self.original_item_status = self.item.status
+
         super().save(*args, **kwargs)
 
     @property
@@ -123,6 +182,130 @@ class TransferRequest(models.Model):
             delta = self.expires_at - timezone.now()
             return max(0, delta.days)
         return None
+
+    def time_until_expiration(self):
+        """
+        Get precise time until expiration.
+        Returns timedelta or None.
+        """
+        from django.utils import timezone
+
+        if self.status != self.Status.PENDING:
+            return None
+
+        # Use extended deadline if available
+        deadline = self.expiration_extended_until or self.expires_at
+
+        if not deadline:
+            return None
+
+        delta = deadline - timezone.now()
+        return delta if delta.total_seconds() > 0 else None
+
+    def can_expire(self):
+        """
+        Check if request can be expired.
+        Returns True if request is pending and past deadline.
+        """
+        from django.utils import timezone
+
+        if self.status != self.Status.PENDING:
+            return False
+
+        # Use extended deadline if available
+        deadline = self.expiration_extended_until or self.expires_at
+
+        if not deadline:
+            return False
+
+        return timezone.now() >= deadline
+
+    @transaction.atomic
+    def expire(self, expired_by_user=None):
+        """
+        Expire the transfer request.
+
+        For RETURN requests: Revert item status to original (before PENDING_INSPECTION).
+        For ASSIGN requests: Just expire without status change.
+
+        Args:
+            expired_by_user: User who manually expired (None for automatic expiration)
+
+        Returns:
+            bool: True if expired successfully
+        """
+        from django.utils import timezone
+
+        # Validate
+        if self.status != self.Status.PENDING:
+            raise ValidationError(f"Cannot expire request with status {self.get_status_display()}.")
+
+        # Lock the item to prevent race conditions
+        from items.models import Item
+        item = Item.objects.select_for_update().get(pk=self.item.pk)
+
+        # Update request status
+        self.status = self.Status.EXPIRED
+        self.resolved_at = timezone.now()
+        if expired_by_user:
+            self.manually_expired_by = expired_by_user
+
+        # Handle item status based on request type
+        if self.request_type == self.RequestType.RETURN:
+            # Revert to original status if we have it
+            if self.original_item_status:
+                # Only revert if item status hasn't been manually changed
+                if item.status == 'PENDING_INSPECTION':
+                    item.status = self.original_item_status
+                    item.save()
+            else:
+                # Fallback: revert PENDING_INSPECTION to NORMAL
+                if item.status == 'PENDING_INSPECTION':
+                    item.status = 'NORMAL'
+                    item.save()
+
+        # For ASSIGN requests, just expire without changing item status
+
+        self.save()
+        return True
+
+    def extend_expiration(self, days, extended_by_user):
+        """
+        Extend the expiration deadline.
+
+        Args:
+            days: Number of days to extend (from current deadline)
+            extended_by_user: User extending the deadline (must be MANAGER)
+
+        Returns:
+            bool: True if extended successfully
+        """
+        from django.utils import timezone
+        from datetime import timedelta
+
+        # Validate permissions
+        if not extended_by_user.is_manager:
+            raise ValidationError("Only managers can extend expiration deadlines.")
+
+        # Validate request is still pending
+        if self.status != self.Status.PENDING:
+            raise ValidationError(f"Cannot extend request with status {self.get_status_display()}.")
+
+        # Calculate new deadline from current deadline (original or already extended)
+        current_deadline = self.expiration_extended_until or self.expires_at
+
+        if not current_deadline:
+            raise ValidationError("Cannot extend request without expiration date.")
+
+        # Set new extended deadline
+        self.expiration_extended_until = current_deadline + timedelta(days=days)
+
+        # Reset warning flags so warnings can be sent again
+        self.warning_48h_sent = False
+        self.warning_24h_sent = False
+
+        self.save()
+        return True
 
     def clean(self):
         """Validate transfer request."""
@@ -272,7 +455,8 @@ class TransferLog(models.Model):
 
     item = models.ForeignKey(
         'items.Item',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,  # Preserve audit trail even if item is deleted
+        null=True,  # Allow null to preserve logs
         related_name='transfer_logs',
         verbose_name='Item'
     )

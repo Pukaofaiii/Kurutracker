@@ -8,8 +8,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.db import transaction
 
-from users.decorators import auditor_required
-from audit.decorators import auditor_or_manager_required
+from users.decorators import auditor_required, auditor_or_manager_required
 from items.models import Item, ItemCategory
 from transfers.models import TransferRequest, TransferLog
 from locations.models import Location, Room
@@ -116,6 +115,15 @@ def audit_mark_damaged(request, item_id):
     """
     item = get_object_or_404(Item, pk=item_id)
 
+    # Check if user has permission to audit this item
+    if not request.user.can_audit_item(item):
+        messages.error(
+            request,
+            f"You don't have permission to audit item {item.asset_id}. "
+            "Contact your manager for auditor assignment."
+        )
+        return redirect('audit:audit_checklist')
+
     # Validate item can be marked as damaged
     if item.status == 'LOST':
         messages.error(request, f"Cannot mark lost item {item.asset_id} as damaged. Use 'Found' workflow first.")
@@ -188,6 +196,15 @@ def audit_mark_lost(request, item_id):
     Item remains assigned to current owner (keeps them accountable).
     """
     item = get_object_or_404(Item, pk=item_id)
+
+    # Check if user has permission to audit this item
+    if not request.user.can_audit_item(item):
+        messages.error(
+            request,
+            f"You don't have permission to audit item {item.asset_id}. "
+            "Contact your manager for auditor assignment."
+        )
+        return redirect('audit:audit_checklist')
 
     # Validate item can be marked as lost
     if item.status == 'REMOVED':
@@ -274,6 +291,15 @@ def audit_found_item(request, item_id):
     """
     item = get_object_or_404(Item, pk=item_id)
 
+    # Check if user has permission to audit this item
+    if not request.user.can_audit_item(item):
+        messages.error(
+            request,
+            f"You don't have permission to audit item {item.asset_id}. "
+            "Contact your manager for auditor assignment."
+        )
+        return redirect('audit:audit_checklist')
+
     # Validate item is lost
     if item.status != 'LOST':
         messages.error(request, f"Item {item.asset_id} is not marked as lost.")
@@ -338,6 +364,14 @@ def update_item_status(request, pk):
     Allows quick status updates for audits.
     """
     item = get_object_or_404(Item, pk=pk)
+
+    # Check if user has permission to audit this item
+    if not request.user.can_audit_item(item):
+        return JsonResponse({
+            'success': False,
+            'error': f'You don\'t have permission to audit item {item.asset_id}'
+        }, status=403)
+
     new_status = request.POST.get('status')
 
     if new_status not in dict(Item.Status.choices).keys():

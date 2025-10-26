@@ -1,26 +1,26 @@
 {% extends 'base.html' %}
 
-{% block title %}Teacher Dashboard - Kurutracker{% endblock %}
+{% block title %}Teacher Dashboard - KURU Tracker{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
     <!-- Welcome Header -->
-    <div class="bg-gradient-to-r from-green-500 to-teal-600 rounded-xl shadow-lg p-8 text-white">
-        <h1 class="text-3xl font-bold mb-2">Welcome, {{ user.first_name|default:user.email }}!</h1>
-        <p class="text-green-100">Here's your asset overview</p>
+    <div class="bg-white rounded-xl shadow-md p-8 border-l-4 border-kuru-success">
+        <h1 class="text-3xl font-bold text-kuru-brown mb-2">welcome, {{ user.first_name|default:user.email }}!</h1>
+        <p class="text-gray-600">here's your asset overview</p>
     </div>
 
     <!-- Stats Overview -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- My Items Card -->
-        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-shadow duration-200 border-t-4 border-blue-500">
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border-t-4 border-kuru-green">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium mb-1">My Items</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ my_items_count }}</p>
+                    <p class="text-gray-600 text-sm font-semibold mb-1">my items</p>
+                    <p class="text-3xl font-bold text-kuru-brown">{{ my_items_count }}</p>
                 </div>
-                <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-14 h-14 bg-kuru-green/10 rounded-xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-kuru-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
                 </div>
@@ -28,14 +28,14 @@
         </div>
 
         <!-- Pending Requests Card -->
-        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-shadow duration-200 border-t-4 border-yellow-500">
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border-t-4 border-kuru-yellow">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium mb-1">Pending Requests</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ pending_count }}</p>
+                    <p class="text-gray-600 text-sm font-semibold mb-1">pending requests</p>
+                    <p class="text-3xl font-bold text-kuru-brown">{{ pending_count }}</p>
                 </div>
-                <div class="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center">
-                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-14 h-14 bg-kuru-yellow/20 rounded-xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-kuru-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
@@ -43,11 +43,11 @@
         </div>
 
         <!-- Quick Action Card -->
-        <div class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-md p-6 hover:shadow-xl transition-shadow duration-200 text-white">
-            <p class="text-sm font-medium mb-3 opacity-90">Quick Actions</p>
+        <div class="bg-kuru-blue rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 text-white">
+            <p class="text-sm font-semibold mb-3 opacity-90">quick actions</p>
             <a href="{% url 'transfers:pending_requests' %}"
-               class="block w-full bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-purple-50 transition-colors duration-200 text-center">
-                View All Requests
+               class="block w-full bg-white text-kuru-blue px-4 py-2 rounded-lg font-semibold hover:bg-white/90 transition-colors duration-200 text-center shadow-sm">
+                view all requests
             </a>
         </div>
     </div>
@@ -55,34 +55,34 @@
     <!-- Pending Requests Received -->
     {% if pending_requests_received %}
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Action Required</h2>
-            <p class="text-orange-100 text-sm">Items waiting for your approval</p>
+        <div class="bg-kuru-orange px-6 py-4 border-b-2 border-kuru-orange/20">
+            <h2 class="text-xl font-bold text-white">action required</h2>
+            <p class="text-white/80 text-sm">items waiting for your approval</p>
         </div>
         <div class="p-6">
             <div class="space-y-3">
                 {% for request in pending_requests_received %}
-                <div class="flex items-center justify-between p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500 hover:bg-orange-100 transition-colors duration-200">
+                <div class="flex items-center justify-between p-4 bg-kuru-orange/10 rounded-xl border-l-4 border-kuru-orange hover:bg-kuru-orange/20 transition-colors duration-200">
                     <div class="flex-1">
-                        <p class="font-semibold text-gray-900">{{ request.item.name }}</p>
-                        <p class="text-sm text-gray-600">Asset ID: {{ request.item.asset_id }}</p>
+                        <p class="font-semibold text-kuru-brown">{{ request.item.name }}</p>
+                        <p class="text-sm text-gray-600">asset ID: {{ request.item.asset_id }}</p>
                         <p class="text-sm text-gray-500 mt-1">
-                            <span class="font-medium">From:</span> {{ request.from_user.email }}
+                            <span class="font-medium">from:</span> {{ request.from_user.email }}
                         </p>
                         {% if request.notes %}
                         <p class="text-sm text-gray-500 mt-1">
-                            <span class="font-medium">Notes:</span> {{ request.notes }}
+                            <span class="font-medium">notes:</span> {{ request.notes }}
                         </p>
                         {% endif %}
                     </div>
                     <div class="flex space-x-2 ml-4">
                         <a href="{% url 'transfers:accept_request' request.pk %}"
-                           class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 font-medium">
-                            Accept
+                           class="px-4 py-2 bg-kuru-success text-white rounded-lg hover:bg-kuru-success/90 transition-colors duration-200 font-medium shadow-sm">
+                            accept
                         </a>
                         <a href="{% url 'transfers:reject_request' request.pk %}"
-                           class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium">
-                            Reject
+                           class="px-4 py-2 bg-kuru-danger text-white rounded-lg hover:bg-kuru-danger/90 transition-colors duration-200 font-medium shadow-sm">
+                            reject
                         </a>
                     </div>
                 </div>
@@ -94,32 +94,32 @@
 
     <!-- My Items -->
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">My Items</h2>
-            <p class="text-blue-100 text-sm">Assets currently in your possession</p>
+        <div class="bg-kuru-green px-6 py-4 border-b-2 border-kuru-green/20">
+            <h2 class="text-xl font-bold text-white">my items</h2>
+            <p class="text-white/80 text-sm">assets currently in your possession</p>
         </div>
         <div class="p-6">
             {% if my_items %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {% for item in my_items %}
-                <div class="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all duration-200">
+                <div class="border-2 border-gray-200 rounded-xl p-4 hover:border-kuru-green hover:shadow-md transition-all duration-200">
                     <div class="flex justify-between items-start mb-3">
-                        <h3 class="font-bold text-gray-900">{{ item.name }}</h3>
-                        <span class="px-2 py-1 rounded-full text-xs font-medium
-                            {% if item.status == 'NORMAL' %}bg-green-100 text-green-800
-                            {% elif item.status == 'DAMAGED' %}bg-red-100 text-red-800
-                            {% elif item.status == 'PENDING_INSPECTION' %}bg-yellow-100 text-yellow-800
-                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        <h3 class="font-bold text-kuru-brown">{{ item.name }}</h3>
+                        <span class="px-2 py-1 rounded text-xs font-medium
+                            {% if item.status == 'NORMAL' %}bg-kuru-blue/20 text-kuru-blue
+                            {% elif item.status == 'DAMAGED' %}bg-kuru-danger/20 text-kuru-danger
+                            {% elif item.status == 'PENDING_INSPECTION' %}bg-kuru-yellow/20 text-kuru-yellow
+                            {% else %}bg-gray-100 text-gray-700{% endif %}">
                             {{ item.get_status_display }}
                         </span>
                     </div>
                     <p class="text-sm text-gray-600 mb-2">ID: {{ item.asset_id }}</p>
                     {% if item.category %}
-                    <p class="text-sm text-gray-500 mb-3">Category: {{ item.category.name }}</p>
+                    <p class="text-sm text-gray-500 mb-3">category: {{ item.category.name }}</p>
                     {% endif %}
                     <a href="{% url 'transfers:create_return' item.pk %}"
-                       class="block w-full text-center px-3 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 font-medium text-sm">
-                        Return Item
+                       class="block w-full text-center px-3 py-2 bg-kuru-green text-white rounded-lg hover:bg-kuru-green/90 transition-all duration-200 font-medium text-sm shadow-sm">
+                        return item
                     </a>
                 </div>
                 {% endfor %}
@@ -129,7 +129,7 @@
                 <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                 </svg>
-                <p class="text-gray-500 text-lg">You don't have any items yet</p>
+                <p class="text-gray-500 text-lg">you don't have any items yet</p>
             </div>
             {% endif %}
         </div>
@@ -138,22 +138,22 @@
     <!-- Pending Requests Sent -->
     {% if pending_requests_sent %}
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="bg-gradient-to-r from-gray-600 to-gray-800 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Requests Sent</h2>
-            <p class="text-gray-300 text-sm">Waiting for staff approval</p>
+        <div class="bg-gray-600 px-6 py-4 border-b-2 border-gray-500/20">
+            <h2 class="text-xl font-bold text-white">requests sent</h2>
+            <p class="text-gray-200 text-sm">waiting for staff approval</p>
         </div>
         <div class="p-6">
             <div class="space-y-3">
                 {% for request in pending_requests_sent %}
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border-l-4 border-gray-500">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border-l-4 border-gray-400">
                     <div>
-                        <p class="font-semibold text-gray-900">{{ request.item.name }}</p>
-                        <p class="text-sm text-gray-600">Asset ID: {{ request.item.asset_id }}</p>
+                        <p class="font-semibold text-kuru-brown">{{ request.item.name }}</p>
+                        <p class="text-sm text-gray-600">asset ID: {{ request.item.asset_id }}</p>
                         <p class="text-sm text-gray-500 mt-1">
-                            <span class="font-medium">To:</span> {{ request.to_user.email }}
+                            <span class="font-medium">to:</span> {{ request.to_user.email }}
                         </p>
                     </div>
-                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">Pending</span>
+                    <span class="px-3 py-1 bg-kuru-yellow/20 text-kuru-yellow rounded text-sm font-medium">pending</span>
                 </div>
                 {% endfor %}
             </div>

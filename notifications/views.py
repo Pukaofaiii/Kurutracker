@@ -4,6 +4,7 @@ Notification views.
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from .models import Notification
 
@@ -35,6 +36,7 @@ def notification_list(request):
 
 
 @login_required
+@require_POST
 def mark_as_read(request, pk):
     """Mark a single notification as read."""
     notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
@@ -45,6 +47,7 @@ def mark_as_read(request, pk):
 
 
 @login_required
+@require_POST
 def mark_all_as_read(request):
     """Mark all notifications as read for current user."""
     Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)

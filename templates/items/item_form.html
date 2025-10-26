@@ -1,29 +1,124 @@
 {% extends 'base.html' %}
 
-{% block title %}{% if form.instance.pk %}Edit Item{% else %}Add New Item{% endif %} - Kurutracker{% endblock %}
+{% block title %}{% if form.instance.pk %}{{ form.instance.name }} - edit{% else %}add new item{% endif %} - KURU Tracker{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto space-y-6">
+<div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center">
-        <a href="{% url 'items:item_list' %}"
-           class="mr-4 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
-        </a>
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900">
-                {% if form.instance.pk %}Edit Item{% else %}Add New Item{% endif %}
-            </h1>
-            <p class="text-gray-600 mt-1">{% if form.instance.pk %}Update item details{% else %}Register a new asset in the system{% endif %}</p>
+    <div class="flex justify-between items-center">
+        <div class="flex items-center">
+            <a href="{% url 'items:item_list' %}"
+               class="mr-4 p-2 text-gray-600 hover:text-kuru-brown hover:bg-kuru-beige rounded-lg transition-colors duration-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+            </a>
+            <div>
+                {% if form.instance.pk %}
+                <h1 class="text-3xl font-bold text-kuru-brown">{{ form.instance.name }}</h1>
+                <p class="text-gray-600 mt-1">asset ID: {{ form.instance.asset_id }}</p>
+                {% else %}
+                <h1 class="text-3xl font-bold text-kuru-brown">add new item</h1>
+                <p class="text-gray-600 mt-1">register a new asset in the system</p>
+                {% endif %}
+            </div>
         </div>
+        {% if form.instance.pk %}
+        <div class="flex items-center space-x-3">
+            <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold
+                {% if form.instance.status == 'NORMAL' %}bg-kuru-blue/20 text-kuru-blue
+                {% elif form.instance.status == 'DAMAGED' %}bg-kuru-danger/20 text-kuru-danger
+                {% elif form.instance.status == 'REPAIR' %}bg-kuru-yellow/20 text-kuru-yellow
+                {% elif form.instance.status == 'LOST' %}bg-kuru-orange/20 text-kuru-orange
+                {% elif form.instance.status == 'PENDING_INSPECTION' %}bg-kuru-success/20 text-kuru-success
+                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                {{ form.instance.get_status_display }}
+            </span>
+        </div>
+        {% endif %}
     </div>
 
-    <!-- Form Card -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Item Information</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Content (Left & Center) -->
+        <div class="lg:col-span-2 space-y-6">
+
+            {% if form.instance.pk %}
+            <!-- Item Details Display (View Mode) -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-kuru-brown px-6 py-4 border-b-2 border-kuru-brown/20">
+                    <h2 class="text-xl font-bold text-white">item information</h2>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium mb-1">asset ID</p>
+                            <p class="text-kuru-brown font-bold">{{ form.instance.asset_id }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium mb-1">name</p>
+                            <p class="text-gray-900 font-semibold">{{ form.instance.name }}</p>
+                        </div>
+                        {% if form.instance.model %}
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium mb-1">model</p>
+                            <p class="text-gray-900">{{ form.instance.model }}</p>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium mb-1">category</p>
+                            <p class="text-gray-900">{{ form.instance.category.name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium mb-1">current owner</p>
+                            <p class="text-gray-900">{{ form.instance.current_owner.get_full_name|default:form.instance.current_owner.email }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium mb-1">status</p>
+                            <span class="inline-flex items-center px-3 py-1 rounded text-xs font-semibold
+                                {% if form.instance.status == 'NORMAL' %}bg-kuru-blue/20 text-kuru-blue
+                                {% elif form.instance.status == 'DAMAGED' %}bg-kuru-danger/20 text-kuru-danger
+                                {% elif form.instance.status == 'REPAIR' %}bg-kuru-yellow/20 text-kuru-yellow
+                                {% elif form.instance.status == 'LOST' %}bg-kuru-orange/20 text-kuru-orange
+                                {% elif form.instance.status == 'PENDING_INSPECTION' %}bg-kuru-success/20 text-kuru-success
+                                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                {{ form.instance.get_status_display }}
+                            </span>
+                        </div>
+                        {% if form.instance.date_acquired %}
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium mb-1">date acquired</p>
+                            <p class="text-gray-900">{{ form.instance.date_acquired|date:"M d, Y" }}</p>
+                        </div>
+                        {% endif %}
+                        {% if form.instance.price %}
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium mb-1">price</p>
+                            <p class="text-gray-900">${{ form.instance.price }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if form.instance.description %}
+                    <div class="pt-4 mt-4 border-t border-gray-200">
+                        <p class="text-sm text-gray-500 font-medium mb-2">description</p>
+                        <p class="text-gray-700">{{ form.instance.description }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if form.instance.notes %}
+                    <div class="pt-4 mt-4 border-t border-gray-200">
+                        <p class="text-sm text-gray-500 font-medium mb-2">notes</p>
+                        <p class="text-gray-700">{{ form.instance.notes }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+    <!-- Edit Form Card -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-kuru-green px-6 py-4 border-b-2 border-kuru-green/20">
+            <h2 class="text-xl font-bold text-white">{% if form.instance.pk %}edit item details{% else %}item information{% endif %}</h2>
         </div>
 
         <form method="post" enctype="multipart/form-data" class="p-6 space-y-6">
@@ -31,12 +126,12 @@
 
             <!-- Error Messages -->
             {% if form.non_field_errors %}
-            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+            <div class="bg-kuru-danger/10 border-l-4 border-kuru-danger p-4 rounded-xl">
                 <div class="flex">
-                    <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-5 h-5 text-kuru-danger mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                     </svg>
-                    <div class="text-sm text-red-700">
+                    <div class="text-sm text-kuru-danger">
                         {{ form.non_field_errors }}
                     </div>
                 </div>
@@ -45,73 +140,73 @@
 
             <!-- Asset ID -->
             <div>
-                <label for="{{ form.asset_id.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Asset ID <span class="text-red-500">*</span>
+                <label for="{{ form.asset_id.id_for_label }}" class="block text-sm font-semibold text-kuru-brown mb-2">
+                    asset ID <span class="text-kuru-danger">*</span>
                 </label>
                 {{ form.asset_id }}
                 {% if form.asset_id.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.asset_id.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.asset_id.errors.0 }}</p>
                 {% endif %}
-                <p class="mt-1 text-sm text-gray-500">Unique identifier for this item</p>
+                <p class="mt-1 text-sm text-gray-500">unique identifier for this item</p>
             </div>
 
             <!-- Name -->
             <div>
-                <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Item Name <span class="text-red-500">*</span>
+                <label for="{{ form.name.id_for_label }}" class="block text-sm font-semibold text-kuru-brown mb-2">
+                    item name <span class="text-kuru-danger">*</span>
                 </label>
                 {{ form.name }}
                 {% if form.name.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.name.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.name.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Description -->
             <div>
-                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Description
+                <label for="{{ form.description.id_for_label }}" class="block text-sm font-semibold text-kuru-brown mb-2">
+                    description
                 </label>
                 {{ form.description }}
                 {% if form.description.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.description.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Category -->
             <div>
-                <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Category
+                <label for="{{ form.category.id_for_label }}" class="block text-sm font-semibold text-kuru-brown mb-2">
+                    category
                 </label>
                 {{ form.category }}
                 {% if form.category.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.category.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.category.errors.0 }}</p>
                 {% endif %}
-                <a href="{% url 'items:category_list' %}" class="text-sm text-blue-600 hover:text-blue-800 mt-1 inline-block">
-                    Manage Categories →
+                <a href="{% url 'items:category_list' %}" class="text-sm text-kuru-blue hover:text-kuru-blue/80 mt-1 inline-block">
+                    manage categories →
                 </a>
             </div>
 
             <!-- Current Owner -->
             <div>
-                <label for="{{ form.current_owner.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Current Owner <span class="text-red-500">*</span>
+                <label for="{{ form.current_owner.id_for_label }}" class="block text-sm font-semibold text-kuru-brown mb-2">
+                    current owner <span class="text-kuru-danger">*</span>
                 </label>
                 {{ form.current_owner }}
                 {% if form.current_owner.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.current_owner.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.current_owner.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Room (with autocomplete) -->
             <div>
-                <label for="{{ form.room.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Room
+                <label for="{{ form.room.id_for_label }}" class="block text-sm font-semibold text-kuru-brown mb-2">
+                    room
                 </label>
                 <div class="relative">
                     <input type="text"
                            id="room-search"
-                           placeholder="Type 3+ characters to search (e.g., sc201)..."
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="type 3+ characters to search (e.g., sc201)..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-kuru-green"
                            autocomplete="off">
                     <div id="room-dropdown" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                         <!-- Dropdown items will be inserted here by JavaScript -->
@@ -119,59 +214,59 @@
                 </div>
                 {{ form.room }}
                 {% if form.room.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.room.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.room.errors.0 }}</p>
                 {% endif %}
-                <p class="mt-1 text-sm text-gray-500">Type at least 3 characters to search for rooms</p>
+                <p class="mt-1 text-sm text-gray-500">type at least 3 characters to search for rooms</p>
             </div>
 
             <!-- Location Description -->
             <div>
-                <label for="{{ form.location_description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Location Description
+                <label for="{{ form.location_description.id_for_label }}" class="block text-sm font-semibold text-kuru-brown mb-2">
+                    location description
                 </label>
                 {{ form.location_description }}
                 {% if form.location_description.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.location_description.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.location_description.errors.0 }}</p>
                 {% endif %}
-                <p class="mt-1 text-sm text-gray-500">e.g., Building 1, floor 2</p>
+                <p class="mt-1 text-sm text-gray-500">e.g., building 1, floor 2</p>
             </div>
             <!-- Status -->
             <div>
-                <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Status <span class="text-red-500">*</span>
+                <label for="{{ form.status.id_for_label }}" class="block text-sm font-semibold text-kuru-brown mb-2">
+                    status <span class="text-kuru-danger">*</span>
                 </label>
                 {{ form.status }}
                 {% if form.status.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.status.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.status.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Date Acquired -->
             <div>
-                <label for="{{ form.date_acquired.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Date Acquired <span class="text-red-500">*</span>
+                <label for="{{ form.date_acquired.id_for_label }}" class="block text-sm font-semibold text-kuru-brown mb-2">
+                    date acquired <span class="text-kuru-danger">*</span>
                 </label>
                 {{ form.date_acquired }}
                 {% if form.date_acquired.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.date_acquired.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.date_acquired.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Price -->
             <div>
-                <label for="{{ form.price.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Price
+                <label for="{{ form.price.id_for_label }}" class="block text-sm font-semibold text-kuru-brown mb-2">
+                    price
                 </label>
                 {{ form.price }}
                 {% if form.price.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.price.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.price.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Image -->
             <div>
-                <label for="{{ form.image.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    Item Image
+                <label for="{{ form.image.id_for_label }}" class="block text-sm font-semibold text-kuru-brown mb-2">
+                    item image
                 </label>
                 {% if form.instance.image %}
                 <div class="mb-3">
@@ -180,22 +275,155 @@
                 {% endif %}
                 {{ form.image }}
                 {% if form.image.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.image.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.image.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Action Buttons -->
             <div class="flex space-x-4 pt-4 border-t border-gray-200">
                 <button type="submit"
-                        class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-                    {% if form.instance.pk %}Save Changes{% else %}Create Item{% endif %}
+                        class="flex-1 px-6 py-3 bg-kuru-success text-white rounded-lg hover:bg-kuru-success/90 transition-all duration-200 shadow-md hover:shadow-lg font-semibold">
+                    {% if form.instance.pk %}save changes{% else %}create item{% endif %}
                 </button>
                 <a href="{% url 'items:item_list' %}"
                    class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">
-                    Cancel
+                    cancel
                 </a>
             </div>
         </form>
+    </div>
+
+            {% if form.instance.pk %}
+            <!-- Transfer History -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-kuru-brown px-6 py-4 border-b-2 border-kuru-brown/20">
+                    <h2 class="text-xl font-bold text-white">transfer history</h2>
+                </div>
+                <div class="p-6">
+                    {% if transfer_history %}
+                    <div class="space-y-3">
+                        {% for log in transfer_history %}
+                        <div class="flex items-start p-4 bg-gray-50 rounded-xl border-l-4 border-kuru-green">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <span class="px-2 py-1 rounded text-xs font-medium mr-2
+                                        {% if log.transfer_type == 'ASSIGN' %}bg-kuru-green/20 text-kuru-green
+                                        {% else %}bg-kuru-orange/20 text-kuru-orange{% endif %}">
+                                        {{ log.get_transfer_type_display }}
+                                    </span>
+                                    {% if log.is_forced %}
+                                    <span class="px-2 py-1 rounded text-xs font-medium bg-kuru-danger/20 text-kuru-danger">
+                                        forced transfer
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <p class="text-sm text-gray-700">
+                                    <span class="font-medium">from:</span> {{ log.from_user.email }}
+                                    <span class="mx-2">→</span>
+                                    <span class="font-medium">to:</span> {{ log.to_user.email }}
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">{{ log.transferred_at|date:"M d, Y - g:i A" }}</p>
+                                {% if log.notes %}
+                                <p class="text-sm text-gray-600 mt-2">{{ log.notes }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8 text-gray-500">
+                        <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p>no transfer history yet</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- Sidebar (Right) -->
+        <div class="space-y-6">
+            {% if form.instance.pk %}
+            <!-- Item Image -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                {% if form.instance.image %}
+                <img src="{{ form.instance.image.url }}" alt="{{ form.instance.name }}" class="w-full h-64 object-cover">
+                {% else %}
+                <div class="w-full h-64 bg-kuru-beige flex items-center justify-center">
+                    <svg class="w-24 h-24 text-kuru-brown/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Quick Actions -->
+            {% if user.is_staff_or_admin %}
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="font-bold text-kuru-brown mb-4">quick actions</h3>
+                <div class="space-y-2">
+                    {% if form.instance.status == 'REMOVED' %}
+                    <a href="{% url 'items:restore_item' form.instance.pk %}"
+                       class="block w-full px-4 py-3 bg-kuru-success text-white rounded-lg hover:bg-kuru-success/90 transition-all duration-200 font-medium text-center shadow-md hover:shadow-lg">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        restore item
+                    </a>
+                    {% else %}
+                    <a href="{% url 'items:item_delete' form.instance.pk %}"
+                       class="block w-full px-4 py-3 bg-kuru-danger text-white rounded-lg hover:bg-kuru-danger/90 transition-all duration-200 font-medium text-center shadow-sm">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        delete item
+                    </a>
+                    <a href="{% url 'transfers:create_transfer' %}"
+                       class="block w-full px-4 py-3 bg-kuru-success text-white rounded-lg hover:bg-kuru-success/90 transition-colors duration-200 font-medium text-center shadow-sm">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                        </svg>
+                        transfer item
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if user == form.instance.current_owner %}
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="font-bold text-kuru-brown mb-4">your actions</h3>
+                <div class="space-y-2">
+                    <a href="{% url 'transfers:create_return' form.instance.pk %}"
+                       class="block w-full px-4 py-3 bg-kuru-blue text-white rounded-lg hover:bg-kuru-blue/90 transition-all duration-200 font-medium text-center shadow-sm">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                        </svg>
+                        return item
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Item Metadata -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="font-bold text-kuru-brown mb-4">metadata</h3>
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <p class="text-gray-500">created</p>
+                        <p class="text-gray-900 font-medium">{{ form.instance.created_at|date:"M d, Y" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">last updated</p>
+                        <p class="text-gray-900 font-medium">{{ form.instance.updated_at|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 
@@ -210,7 +438,7 @@
     }
     input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, textarea:focus, select:focus {
         outline: none;
-        border-color: #3B82F6;
+        border-color: #489FB5;
     }
     textarea {
         min-height: 100px;
@@ -227,10 +455,10 @@
         transition: background-color 0.15s;
     }
     .room-dropdown-item:hover {
-        background-color: #F3F4F6;
+        background-color: #F5EFE7;
     }
     .room-dropdown-item.selected {
-        background-color: #DBEAFE;
+        background-color: rgba(72, 159, 181, 0.1);
         font-weight: 600;
     }
 </style>
@@ -269,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
         );
 
         if (filtered.length === 0) {
-            dropdown.innerHTML = '<div class="p-4 text-gray-500 text-sm">No rooms found</div>';
+            dropdown.innerHTML = '<div class="p-4 text-gray-500 text-sm">no rooms found</div>';
             dropdown.classList.remove('hidden');
             return;
         }

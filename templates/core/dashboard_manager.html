@@ -1,26 +1,26 @@
 {% extends 'base.html' %}
 
-{% block title %}Manager Dashboard - Kurutracker{% endblock %}
+{% block title %}Manager Dashboard - KURU Tracker{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
     <!-- Welcome Header -->
-    <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-xl shadow-lg p-8 text-white">
-        <h1 class="text-3xl font-bold mb-2">Manager Dashboard</h1>
-        <p class="text-purple-100">System overview and management</p>
+    <div class="bg-white rounded-xl shadow-md p-8 border-l-4 border-kuru-green">
+        <h1 class="text-3xl font-bold text-kuru-brown mb-2">manager dashboard</h1>
+        <p class="text-gray-600">system overview and management</p>
     </div>
 
     <!-- Stats Overview -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Total Items -->
-        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-shadow duration-200 border-t-4 border-blue-500">
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border-t-4 border-kuru-green">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium mb-1">Total Items</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ total_items }}</p>
+                    <p class="text-gray-600 text-sm font-semibold mb-1">total items</p>
+                    <p class="text-3xl font-bold text-kuru-brown">{{ total_items }}</p>
                 </div>
-                <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-14 h-14 bg-kuru-green/10 rounded-xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-kuru-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
                 </div>
@@ -28,15 +28,15 @@
         </div>
 
         <!-- Total Users -->
-        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-shadow duration-200 border-t-4 border-purple-500">
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border-t-4 border-kuru-blue">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium mb-1">Active Users</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ total_users }}</p>
+                    <p class="text-gray-600 text-sm font-semibold mb-1">active users</p>
+                    <p class="text-3xl font-bold text-kuru-brown">{{ total_users }}</p>
                     <p class="text-xs text-gray-500 mt-1">T:{{ teachers }} S:{{ staff }} M:{{ admins }}</p>
                 </div>
-                <div class="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center">
-                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-14 h-14 bg-kuru-blue/10 rounded-xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-kuru-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                 </div>
@@ -44,14 +44,14 @@
         </div>
 
         <!-- Pending Transfers -->
-        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-shadow duration-200 border-t-4 border-yellow-500">
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border-t-4 border-kuru-yellow">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium mb-1">Pending</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ pending_transfers }}</p>
+                    <p class="text-gray-600 text-sm font-semibold mb-1">pending</p>
+                    <p class="text-3xl font-bold text-kuru-brown">{{ pending_transfers }}</p>
                 </div>
-                <div class="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center">
-                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-14 h-14 bg-kuru-yellow/20 rounded-xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-kuru-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
@@ -59,14 +59,14 @@
         </div>
 
         <!-- Total Transfers -->
-        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-shadow duration-200 border-t-4 border-green-500">
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border-t-4 border-kuru-success">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm font-medium mb-1">Completed</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ total_transfers }}</p>
+                    <p class="text-gray-600 text-sm font-semibold mb-1">completed</p>
+                    <p class="text-3xl font-bold text-kuru-brown">{{ total_transfers }}</p>
                 </div>
-                <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-14 h-14 bg-kuru-success/10 rounded-xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-kuru-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
@@ -76,34 +76,34 @@
 
     <!-- Item Status Breakdown -->
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Item Status Overview</h2>
+        <div class="bg-kuru-green px-6 py-4 border-b-2 border-kuru-green/20">
+            <h2 class="text-xl font-bold text-white">item status overview</h2>
         </div>
         <div class="p-6">
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                <div class="text-center p-4 bg-green-50 rounded-lg border-2 border-green-200">
-                    <p class="text-3xl font-bold text-green-700">{{ items_by_status.normal }}</p>
-                    <p class="text-sm text-green-600 font-medium mt-1">Normal</p>
+                <div class="text-center p-4 bg-kuru-blue/10 rounded-xl border-2 border-kuru-blue/20">
+                    <p class="text-3xl font-bold text-kuru-blue">{{ items_by_status.normal }}</p>
+                    <p class="text-sm text-gray-600 font-semibold mt-1">normal</p>
                 </div>
-                <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200">
-                    <p class="text-3xl font-bold text-red-700">{{ items_by_status.damaged }}</p>
-                    <p class="text-sm text-red-600 font-medium mt-1">Damaged</p>
+                <div class="text-center p-4 bg-kuru-danger/10 rounded-xl border-2 border-kuru-danger/30">
+                    <p class="text-3xl font-bold text-kuru-danger">{{ items_by_status.damaged }}</p>
+                    <p class="text-sm text-gray-600 font-semibold mt-1">damaged</p>
                 </div>
-                <div class="text-center p-4 bg-orange-50 rounded-lg border-2 border-orange-200">
-                    <p class="text-3xl font-bold text-orange-700">{{ items_by_status.repair }}</p>
-                    <p class="text-sm text-orange-600 font-medium mt-1">In Repair</p>
+                <div class="text-center p-4 bg-kuru-yellow/20 rounded-xl border-2 border-kuru-yellow/40">
+                    <p class="text-3xl font-bold text-kuru-yellow">{{ items_by_status.repair }}</p>
+                    <p class="text-sm text-gray-600 font-semibold mt-1">in repair</p>
                 </div>
-                <div class="text-center p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
-                    <p class="text-3xl font-bold text-purple-700">{{ items_by_status.lost }}</p>
-                    <p class="text-sm text-purple-600 font-medium mt-1">Lost</p>
+                <div class="text-center p-4 bg-kuru-orange/10 rounded-xl border-2 border-kuru-orange/30">
+                    <p class="text-3xl font-bold text-kuru-orange">{{ items_by_status.lost }}</p>
+                    <p class="text-sm text-gray-600 font-semibold mt-1">lost</p>
                 </div>
-                <div class="text-center p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
-                    <p class="text-3xl font-bold text-yellow-700">{{ items_by_status.pending_inspection }}</p>
-                    <p class="text-sm text-yellow-600 font-medium mt-1">Pending</p>
+                <div class="text-center p-4 bg-kuru-success/10 rounded-xl border-2 border-kuru-success/20">
+                    <p class="text-3xl font-bold text-kuru-success">{{ items_by_status.pending_inspection }}</p>
+                    <p class="text-sm text-gray-600 font-semibold mt-1">pending</p>
                 </div>
-                <div class="text-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                <div class="text-center p-4 bg-gray-100 rounded-xl border-2 border-gray-200">
                     <p class="text-3xl font-bold text-gray-700">{{ items_by_status.removed }}</p>
-                    <p class="text-sm text-gray-600 font-medium mt-1">Removed</p>
+                    <p class="text-sm text-gray-600 font-semibold mt-1">removed</p>
                 </div>
             </div>
         </div>
@@ -111,105 +111,105 @@
 
     <!-- Quick Navigation -->
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Quick Navigation</h2>
-            <p class="text-orange-100 text-sm">Go to any section</p>
+        <div class="bg-kuru-orange px-6 py-4 border-b-2 border-kuru-orange/20">
+            <h2 class="text-xl font-bold text-white">quick navigation</h2>
+            <p class="text-white/80 text-sm">go to any section</p>
         </div>
         <div class="p-6">
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <a href="{% url 'items:item_list' %}"
-                   class="group bg-gradient-to-br from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100 border-2 border-blue-200 rounded-xl p-4 transition-all duration-200">
+                   class="group bg-kuru-green/10 hover:bg-kuru-green/20 border-2 border-kuru-green/30 rounded-xl p-4 transition-all duration-200">
                     <div class="flex flex-col items-center text-center">
-                        <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
+                        <div class="w-12 h-12 bg-kuru-green rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                             </svg>
                         </div>
-                        <p class="font-bold text-gray-900">View All Items</p>
+                        <p class="font-semibold text-kuru-brown">view all items</p>
                     </div>
                 </a>
 
                 <a href="{% url 'items:item_create' %}"
-                   class="group bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-2 border-green-200 rounded-xl p-4 transition-all duration-200">
+                   class="group bg-kuru-success/10 hover:bg-kuru-success/20 border-2 border-kuru-success/30 rounded-xl p-4 transition-all duration-200">
                     <div class="flex flex-col items-center text-center">
-                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
+                        <div class="w-12 h-12 bg-kuru-success rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                             </svg>
                         </div>
-                        <p class="font-bold text-gray-900">Add New Item</p>
+                        <p class="font-semibold text-kuru-brown">add new item</p>
                     </div>
                 </a>
 
                 <a href="{% url 'users:user_list' %}"
-                   class="group bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-2 border-purple-200 rounded-xl p-4 transition-all duration-200">
+                   class="group bg-kuru-blue/10 hover:bg-kuru-blue/20 border-2 border-kuru-blue/30 rounded-xl p-4 transition-all duration-200">
                     <div class="flex flex-col items-center text-center">
-                        <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
+                        <div class="w-12 h-12 bg-kuru-blue rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                             </svg>
                         </div>
-                        <p class="font-bold text-gray-900">View All Users</p>
+                        <p class="font-semibold text-kuru-brown">view all users</p>
                     </div>
                 </a>
 
                 <a href="{% url 'users:user_pre_register' %}"
-                   class="group bg-gradient-to-br from-indigo-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 border-2 border-indigo-200 rounded-xl p-4 transition-all duration-200">
+                   class="group bg-kuru-orange/10 hover:bg-kuru-orange/20 border-2 border-kuru-orange/30 rounded-xl p-4 transition-all duration-200">
                     <div class="flex flex-col items-center text-center">
-                        <div class="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
+                        <div class="w-12 h-12 bg-kuru-orange rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                             </svg>
                         </div>
-                        <p class="font-bold text-gray-900">Add New User</p>
+                        <p class="font-semibold text-kuru-brown">add new user</p>
                     </div>
                 </a>
 
                 <a href="{% url 'transfers:pending_requests' %}"
-                   class="group bg-gradient-to-br from-yellow-50 to-orange-50 hover:from-yellow-100 hover:to-orange-100 border-2 border-yellow-200 rounded-xl p-4 transition-all duration-200">
+                   class="group bg-kuru-yellow/20 hover:bg-kuru-yellow/30 border-2 border-kuru-yellow/40 rounded-xl p-4 transition-all duration-200">
                     <div class="flex flex-col items-center text-center">
-                        <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
+                        <div class="w-12 h-12 bg-kuru-yellow rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
-                        <p class="font-bold text-gray-900">Pending Transfers</p>
+                        <p class="font-semibold text-kuru-brown">pending transfers</p>
                     </div>
                 </a>
 
                 <a href="{% url 'transfers:transfer_history' %}"
-                   class="group bg-gradient-to-br from-gray-50 to-slate-50 hover:from-gray-100 hover:to-slate-100 border-2 border-gray-200 rounded-xl p-4 transition-all duration-200">
+                   class="group bg-gray-100 hover:bg-gray-200 border-2 border-gray-200 rounded-xl p-4 transition-all duration-200">
                     <div class="flex flex-col items-center text-center">
-                        <div class="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
+                        <div class="w-12 h-12 bg-gray-600 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
-                        <p class="font-bold text-gray-900">Transfer History</p>
+                        <p class="font-semibold text-kuru-brown">transfer history</p>
                     </div>
                 </a>
 
                 <a href="{% url 'transfers:create_transfer' %}"
-                   class="group bg-gradient-to-br from-teal-50 to-cyan-50 hover:from-teal-100 hover:to-cyan-100 border-2 border-teal-200 rounded-xl p-4 transition-all duration-200">
+                   class="group bg-kuru-green/10 hover:bg-kuru-green/20 border-2 border-kuru-green/30 rounded-xl p-4 transition-all duration-200">
                     <div class="flex flex-col items-center text-center">
-                        <div class="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
+                        <div class="w-12 h-12 bg-kuru-green rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                             </svg>
                         </div>
-                        <p class="font-bold text-gray-900">Create Transfer</p>
+                        <p class="font-semibold text-kuru-brown">create transfer</p>
                     </div>
                 </a>
 
                 <a href="{% url 'items:category_list' %}"
-                   class="group bg-gradient-to-br from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 border-2 border-rose-200 rounded-xl p-4 transition-all duration-200">
+                   class="group bg-kuru-danger/10 hover:bg-kuru-danger/20 border-2 border-kuru-danger/30 rounded-xl p-4 transition-all duration-200">
                     <div class="flex flex-col items-center text-center">
-                        <div class="w-12 h-12 bg-rose-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
+                        <div class="w-12 h-12 bg-kuru-danger rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-200">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                             </svg>
                         </div>
-                        <p class="font-bold text-gray-900">Categories</p>
+                        <p class="font-semibold text-kuru-brown">categories</p>
                     </div>
                 </a>
             </div>
@@ -219,30 +219,30 @@
     <!-- Users with Most Items -->
     {% if users_with_items %}
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Users with Most Items</h2>
-            <p class="text-indigo-100 text-sm">Top 10 users by item count</p>
+        <div class="bg-kuru-blue px-6 py-4 border-b-2 border-kuru-blue/20">
+            <h2 class="text-xl font-bold text-white">users with most items</h2>
+            <p class="text-white/80 text-sm">top 10 users by item count</p>
         </div>
         <div class="p-6">
             <div class="space-y-3">
                 {% for user in users_with_items %}
-                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg hover:from-indigo-100 hover:to-purple-100 transition-colors duration-200">
+                <div class="flex items-center justify-between p-4 bg-kuru-blue/10 rounded-xl hover:bg-kuru-blue/20 transition-colors duration-200 border border-kuru-blue/20">
                     <div class="flex items-center flex-1">
-                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                        <div class="w-10 h-10 bg-kuru-blue rounded-xl flex items-center justify-center text-white font-bold mr-4">
                             {{ forloop.counter }}
                         </div>
                         <div>
-                            <p class="font-semibold text-gray-900">{{ user.email }}</p>
+                            <p class="font-semibold text-kuru-brown">{{ user.email }}</p>
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                                {% if user.is_manager %}bg-purple-100 text-purple-800
-                                {% elif user.is_staff %}bg-blue-100 text-blue-800
-                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {% if user.is_manager %}bg-kuru-orange/20 text-kuru-orange
+                                {% elif user.is_staff %}bg-kuru-blue/20 text-kuru-blue
+                                {% else %}bg-kuru-success/20 text-kuru-success{% endif %}">
                                 {{ user.get_role_display }}
                             </span>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-2xl font-bold text-indigo-600">{{ user.item_count }}</p>
+                        <p class="text-2xl font-bold text-kuru-blue">{{ user.item_count }}</p>
                         <p class="text-sm text-gray-500">items</p>
                     </div>
                 </div>
@@ -255,37 +255,37 @@
     <!-- Recent Transfers -->
     {% if recent_transfers %}
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="bg-gradient-to-r from-gray-700 to-gray-900 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Recent Activity</h2>
-            <p class="text-gray-300 text-sm">Latest 15 completed transfers</p>
+        <div class="bg-kuru-brown px-6 py-4 border-b-2 border-kuru-brown/20">
+            <h2 class="text-xl font-bold text-white">recent activity</h2>
+            <p class="text-white/80 text-sm">latest 15 completed transfers</p>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-kuru-brown uppercase tracking-wider">item</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-kuru-brown uppercase tracking-wider">type</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-kuru-brown uppercase tracking-wider">from</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-kuru-brown uppercase tracking-wider">to</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-kuru-brown uppercase tracking-wider">date</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for transfer in recent_transfers %}
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-kuru-beige/50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ transfer.item.name }}</div>
+                            <div class="text-sm font-semibold text-kuru-brown">{{ transfer.item.name }}</div>
                             <div class="text-sm text-gray-500">{{ transfer.item.asset_id }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                {% if transfer.request_type == 'ASSIGN' %}bg-blue-100 text-blue-800
-                                {% else %}bg-purple-100 text-purple-800{% endif %}">
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded
+                                {% if transfer.request_type == 'ASSIGN' %}bg-kuru-green/20 text-kuru-green
+                                {% else %}bg-kuru-orange/20 text-kuru-orange{% endif %}">
                                 {{ transfer.get_request_type_display }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ transfer.from_user.email }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ transfer.to_user.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ transfer.from_user.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ transfer.to_user.email }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ transfer.resolved_at|date:"M d, Y" }}</td>
                     </tr>
                     {% endfor %}

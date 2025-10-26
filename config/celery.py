@@ -19,13 +19,12 @@ app.autodiscover_tasks()
 
 # Celery Beat schedule for periodic tasks
 app.conf.beat_schedule = {
-    'expire-old-requests': {
-        'task': 'transfers.tasks.expire_old_requests',
-        'schedule': crontab(hour=0, minute=0),  # Run daily at midnight
-    },
-    'send-expiration-reminders': {
-        'task': 'transfers.tasks.send_expiration_reminders',
-        'schedule': crontab(hour=9, minute=0),  # Run daily at 9 AM
+    'check-expiring-requests': {
+        'task': 'transfers.tasks.check_expiring_requests',
+        'schedule': crontab(hour=2, minute=0),  # Run daily at 2 AM
+        'options': {
+            'expires': 3600,  # Task expires after 1 hour if not executed
+        }
     },
 }
 

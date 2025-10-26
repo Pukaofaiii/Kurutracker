@@ -1,23 +1,32 @@
 {% extends 'base.html' %}
 
-{% block title %}Items - Kurutracker{% endblock %}
+{% block title %}Items - KURU Tracker{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex justify-between items-center">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900">Items</h1>
-            <p class="text-gray-600 mt-1">Manage and track all assets</p>
+            <h1 class="text-3xl font-bold text-kuru-brown">items</h1>
+            <p class="text-gray-600 mt-1">manage and track all assets</p>
         </div>
         {% if user.is_staff_or_admin %}
-        <a href="{% url 'items:item_create' %}"
-           class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
-            Add New Item
-        </a>
+        <div class="flex space-x-3">
+            <a href="{% url 'items:removed_items_list' %}"
+               class="px-6 py-3 bg-kuru-brown text-white rounded-lg hover:bg-kuru-brown/90 transition-all duration-200 shadow-md hover:shadow-lg font-semibold flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                view removed items
+            </a>
+            <a href="{% url 'items:item_create' %}"
+               class="px-6 py-3 bg-kuru-success text-white rounded-lg hover:bg-kuru-success/90 transition-all duration-200 shadow-md hover:shadow-lg font-semibold flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                add new item
+            </a>
+        </div>
         {% endif %}
     </div>
 
@@ -26,16 +35,16 @@
         <form method="get" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                    <label class="block text-sm font-semibold text-kuru-brown mb-2">search</label>
                     <input type="text" name="search" value="{{ request.GET.search }}"
-                           placeholder="Asset ID or name..."
-                           class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200">
+                           placeholder="asset ID or name..."
+                           class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-kuru-green focus:outline-none transition-colors duration-200">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <label class="block text-sm font-semibold text-kuru-brown mb-2">category</label>
                     <select name="category"
-                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200">
-                        <option value="">All Categories</option>
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-kuru-green focus:outline-none transition-colors duration-200">
+                        <option value="">all categories</option>
                         {% for category in categories %}
                         <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
                             {{ category.name }}
@@ -44,118 +53,343 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <label class="block text-sm font-semibold text-kuru-brown mb-2">status</label>
                     <select name="status"
-                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200">
-                        <option value="">All Status</option>
-                        <option value="NORMAL" {% if request.GET.status == 'NORMAL' %}selected{% endif %}>Normal</option>
-                        <option value="DAMAGED" {% if request.GET.status == 'DAMAGED' %}selected{% endif %}>Damaged</option>
-                        <option value="REPAIR" {% if request.GET.status == 'REPAIR' %}selected{% endif %}>In Repair</option>
-                        <option value="LOST" {% if request.GET.status == 'LOST' %}selected{% endif %}>Lost</option>
-                        <option value="PENDING_INSPECTION" {% if request.GET.status == 'PENDING_INSPECTION' %}selected{% endif %}>Pending Inspection</option>
-                        <option value="REMOVED" {% if request.GET.status == 'REMOVED' %}selected{% endif %}>Removed</option>
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-kuru-green focus:outline-none transition-colors duration-200">
+                        <option value="">all status</option>
+                        <option value="NORMAL" {% if request.GET.status == 'NORMAL' %}selected{% endif %}>normal</option>
+                        <option value="DAMAGED" {% if request.GET.status == 'DAMAGED' %}selected{% endif %}>damaged</option>
+                        <option value="REPAIR" {% if request.GET.status == 'REPAIR' %}selected{% endif %}>in repair</option>
+                        <option value="LOST" {% if request.GET.status == 'LOST' %}selected{% endif %}>lost</option>
+                        <option value="PENDING_INSPECTION" {% if request.GET.status == 'PENDING_INSPECTION' %}selected{% endif %}>pending inspection</option>
+                        <option value="REMOVED" {% if request.GET.status == 'REMOVED' %}selected{% endif %}>removed</option>
                     </select>
                 </div>
                 <div class="flex items-end">
                     <button type="submit"
-                            class="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
-                        Filter
+                            class="w-full px-6 py-2 bg-kuru-green text-white rounded-lg hover:bg-kuru-green/90 transition-colors duration-200 font-semibold">
+                        filter
                     </button>
                 </div>
+            </div>
+            <div class="flex items-center pt-2">
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" name="hide_removed" value="1"
+                           {% if request.GET.hide_removed %}checked{% endif %}
+                           class="w-4 h-4 text-kuru-green border-gray-300 rounded focus:ring-kuru-green cursor-pointer">
+                    <span class="ml-2 text-sm font-medium text-gray-700">hide removed items</span>
+                </label>
             </div>
         </form>
     </div>
 
-    <!-- Items Grid -->
-    {% if items %}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for item in items %}
-        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-200 border-t-4
-            {% if item.status == 'NORMAL' %}border-green-500
-            {% elif item.status == 'DAMAGED' %}border-red-500
-            {% elif item.status == 'PENDING_INSPECTION' %}border-yellow-500
-            {% else %}border-gray-500{% endif %}">
+    <!-- Hidden CSRF Form for Bulk Operations -->
+    {% if user.is_staff_or_admin %}
+    <form id="csrf-form" style="display: none;">
+        {% csrf_token %}
+    </form>
+    {% endif %}
 
-            {% if item.image %}
-            <div class="h-48 bg-gray-200 overflow-hidden">
-                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-full h-full object-cover">
+    <!-- Bulk Operations Toolbar (Hidden by default) -->
+    {% if user.is_staff_or_admin %}
+    <div id="bulk-toolbar" class="hidden bg-kuru-orange/10 border-2 border-kuru-orange rounded-xl p-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <span id="selection-count" class="text-kuru-brown font-bold">0 items selected</span>
+                <button type="button" onclick="clearSelection()" class="text-sm text-gray-600 hover:text-kuru-brown underline">
+                    clear selection
+                </button>
             </div>
-            {% else %}
-            <div class="h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                <svg class="w-20 h-20 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
-            </div>
-            {% endif %}
-
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-3">
-                    <h3 class="font-bold text-lg text-gray-900">{{ item.name }}</h3>
-                    <span class="px-2 py-1 rounded-full text-xs font-medium
-                        {% if item.status == 'NORMAL' %}bg-green-100 text-green-800
-                        {% elif item.status == 'DAMAGED' %}bg-red-100 text-red-800
-                        {% elif item.status == 'REPAIR' %}bg-orange-100 text-orange-800
-                        {% elif item.status == 'LOST' %}bg-purple-100 text-purple-800
-                        {% elif item.status == 'PENDING_INSPECTION' %}bg-yellow-100 text-yellow-800
-                        {% else %}bg-gray-100 text-gray-800{% endif %}">
-                        {{ item.get_status_display }}
-                    </span>
-                </div>
-
-                <div class="space-y-2 mb-4">
-                    <p class="text-sm text-gray-600">
-                        <span class="font-medium">Asset ID:</span> {{ item.asset_id }}
-                    </p>
-                    {% if item.category %}
-                    <p class="text-sm text-gray-600">
-                        <span class="font-medium">Category:</span> {{ item.category.name }}
-                    </p>
-                    {% endif %}
-                    <p class="text-sm text-gray-600">
-                        <span class="font-medium">Owner:</span> {{ item.current_owner.email }}
-                    </p>
-                </div>
-
-                <div class="flex space-x-2">
-                    <a href="{% url 'items:item_detail' item.pk %}"
-                       class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 font-medium text-center text-sm">
-                        View Details
-                    </a>
-                    {% if user.is_staff_or_admin %}
-                    <a href="{% url 'items:item_update' item.pk %}"
-                       class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium text-sm">
-                        Edit
-                    </a>
-                    <a href="{% url 'items:item_delete' item.pk %}"
-                       class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium text-sm flex items-center"
-                       title="Delete Item">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                    </a>
-                    {% endif %}
-                </div>
+            <div class="flex space-x-3">
+                <button type="button" onclick="bulkDelete()" class="px-4 py-2 bg-kuru-danger text-white rounded-lg hover:bg-kuru-danger/90 transition-colors duration-200 font-semibold shadow-sm">
+                    delete selected
+                </button>
+                <button type="button" onclick="bulkStatus()" class="px-4 py-2 bg-kuru-yellow text-white rounded-lg hover:bg-kuru-yellow/90 transition-colors duration-200 font-semibold shadow-sm">
+                    change status
+                </button>
+                <button type="button" onclick="bulkTransfer()" class="px-4 py-2 bg-kuru-blue text-white rounded-lg hover:bg-kuru-blue/90 transition-colors duration-200 font-semibold shadow-sm">
+                    transfer items
+                </button>
             </div>
         </div>
-        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Items Table -->
+    {% if items %}
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-kuru-brown">
+                <tr>
+                    {% if user.is_staff_or_admin %}
+                    <th scope="col" class="px-6 py-4 text-left">
+                        <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)"
+                               class="w-4 h-4 text-kuru-orange border-gray-300 rounded focus:ring-kuru-orange cursor-pointer">
+                    </th>
+                    {% endif %}
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        image
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        asset ID
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        name
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        category
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        owner
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                        status
+                    </th>
+                    <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
+                        actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for item in items %}
+                <tr class="hover:bg-kuru-beige transition-colors duration-150">
+                    {% if user.is_staff_or_admin %}
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" class="item-checkbox w-4 h-4 text-kuru-orange border-gray-300 rounded focus:ring-kuru-orange cursor-pointer"
+                               value="{{ item.pk }}" onchange="updateBulkToolbar()">
+                    </td>
+                    {% endif %}
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-12 h-12 object-cover rounded-lg border-2 border-gray-200">
+                        {% else %}
+                        <div class="w-12 h-12 bg-kuru-beige rounded-lg flex items-center justify-center border-2 border-gray-200">
+                            <svg class="w-6 h-6 text-kuru-brown/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-bold text-kuru-brown">{{ item.asset_id }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-semibold text-gray-900">{{ item.name }}</div>
+                        {% if item.model %}
+                        <div class="text-xs text-gray-500">{{ item.model }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-600">{{ item.category.name|default:"—" }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-600">{{ item.current_owner.get_full_name|default:item.current_owner.email }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-3 py-1 rounded text-xs font-semibold
+                            {% if item.status == 'NORMAL' %}bg-kuru-blue/20 text-kuru-blue
+                            {% elif item.status == 'DAMAGED' %}bg-kuru-danger/20 text-kuru-danger
+                            {% elif item.status == 'REPAIR' %}bg-kuru-yellow/20 text-kuru-yellow
+                            {% elif item.status == 'LOST' %}bg-kuru-orange/20 text-kuru-orange
+                            {% elif item.status == 'PENDING_INSPECTION' %}bg-kuru-success/20 text-kuru-success
+                            {% else %}bg-gray-100 text-gray-700{% endif %}">
+                            {{ item.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <a href="{% url 'items:item_update' item.pk %}"
+                           class="inline-flex items-center px-3 py-1.5 bg-kuru-orange text-white rounded-lg hover:bg-kuru-orange/90 transition-colors duration-150 font-semibold text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                            edit
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     {% else %}
     <div class="bg-white rounded-xl shadow-md p-12 text-center">
         <svg class="w-20 h-20 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
         </svg>
-        <h3 class="text-xl font-semibold text-gray-700 mb-2">No items found</h3>
-        <p class="text-gray-500 mb-6">Try adjusting your search or filters</p>
+        <h3 class="text-xl font-semibold text-kuru-brown mb-2">no items found</h3>
+        <p class="text-gray-500 mb-6">try adjusting your search or filters</p>
         {% if user.is_staff_or_admin %}
         <a href="{% url 'items:item_create' %}"
-           class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-medium">
+           class="inline-flex items-center px-6 py-3 bg-kuru-success text-white rounded-lg hover:bg-kuru-success/90 transition-all duration-200 font-semibold shadow-md">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>
-            Add Your First Item
+            add your first item
         </a>
         {% endif %}
     </div>
     {% endif %}
 </div>
+
+<script>
+// Track selected items
+let selectedItems = new Set();
+
+// Toggle select all checkboxes
+function toggleSelectAll(checkbox) {
+    const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+    itemCheckboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+        if (checkbox.checked) {
+            selectedItems.add(cb.value);
+        } else {
+            selectedItems.delete(cb.value);
+        }
+    });
+    updateBulkToolbar();
+}
+
+// Update bulk toolbar visibility and count
+function updateBulkToolbar() {
+    const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+    const toolbar = document.getElementById('bulk-toolbar');
+    const countDisplay = document.getElementById('selection-count');
+    const selectAllCheckbox = document.getElementById('select-all');
+
+    // Update selectedItems set
+    selectedItems.clear();
+    itemCheckboxes.forEach(cb => {
+        if (cb.checked) {
+            selectedItems.add(cb.value);
+        }
+    });
+
+    // Update select-all checkbox state
+    if (selectAllCheckbox) {
+        const allChecked = Array.from(itemCheckboxes).every(cb => cb.checked);
+        const someChecked = Array.from(itemCheckboxes).some(cb => cb.checked);
+        selectAllCheckbox.checked = allChecked;
+        selectAllCheckbox.indeterminate = someChecked && !allChecked;
+    }
+
+    // Show/hide toolbar
+    const count = selectedItems.size;
+    if (count > 0) {
+        toolbar.classList.remove('hidden');
+        countDisplay.textContent = `${count} item${count !== 1 ? 's' : ''} selected`;
+    } else {
+        toolbar.classList.add('hidden');
+    }
+}
+
+// Clear all selections
+function clearSelection() {
+    const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+    const selectAllCheckbox = document.getElementById('select-all');
+
+    itemCheckboxes.forEach(cb => cb.checked = false);
+    if (selectAllCheckbox) selectAllCheckbox.checked = false;
+    selectedItems.clear();
+    updateBulkToolbar();
+}
+
+// Get CSRF token from hidden form
+function getCsrfToken() {
+    const csrfForm = document.getElementById('csrf-form');
+    if (csrfForm) {
+        const csrfInput = csrfForm.querySelector('[name=csrfmiddlewaretoken]');
+        return csrfInput ? csrfInput.value : '';
+    }
+    return '';
+}
+
+// Bulk delete
+function bulkDelete() {
+    if (selectedItems.size === 0) {
+        alert('Please select items to delete');
+        return;
+    }
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{% url "items:bulk_delete" %}';
+
+    const csrfToken = getCsrfToken();
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+
+    selectedItems.forEach(itemId => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'item_ids';
+        input.value = itemId;
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Bulk status change
+function bulkStatus() {
+    if (selectedItems.size === 0) {
+        alert('Please select items to change status');
+        return;
+    }
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{% url "items:bulk_status" %}';
+
+    const csrfToken = getCsrfToken();
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+
+    selectedItems.forEach(itemId => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'item_ids';
+        input.value = itemId;
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Bulk transfer
+function bulkTransfer() {
+    if (selectedItems.size === 0) {
+        alert('Please select items to transfer');
+        return;
+    }
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{% url "items:bulk_transfer" %}';
+
+    const csrfToken = getCsrfToken();
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+
+    selectedItems.forEach(itemId => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'item_ids';
+        input.value = itemId;
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
 {% endblock %}

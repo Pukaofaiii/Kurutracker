@@ -20,7 +20,10 @@ class UserAdmin(BaseUserAdmin):
         (None, {'fields': ('email', 'password')}),
         ('Personal Info', {'fields': ('first_name', 'last_name', 'phone_number', 'department')}),
         ('Permissions', {
-            'fields': ('role', 'is_pre_registered', 'is_active', 'is_staff', 'is_superuser'),
+            'fields': ('role', 'is_auditor', 'is_pre_registered', 'is_active', 'is_staff', 'is_superuser'),
+        }),
+        ('Preferences', {
+            'fields': ('disable_expiration_emails',),
         }),
         ('Important Dates', {'fields': ('last_login', 'created_at', 'updated_at')}),
     )

@@ -1,49 +1,81 @@
 {% extends 'base.html' %}
 
-{% block title %}Categories - Kurutracker{% endblock %}
+{% block title %}categories - KURU Tracker{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
-    <div class="bg-gradient-to-r from-pink-600 to-rose-600 rounded-xl shadow-lg p-8">
+    <div class="bg-white rounded-xl shadow-md p-8 border-l-4 border-kuru-orange">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-white mb-2">Item Categories</h1>
-                <p class="text-pink-100">Manage item categories</p>
+                <h1 class="text-3xl font-bold text-kuru-brown mb-2">item categories</h1>
+                <p class="text-gray-600">manage item categories</p>
             </div>
-            <a href="{% url 'items:category_create' %}" class="px-6 py-3 bg-white text-pink-600 rounded-lg font-bold hover:bg-pink-50 transition-all shadow-lg hover:shadow-xl flex items-center">
+            <a href="{% url 'items:category_create' %}" class="px-6 py-3 bg-kuru-success text-white rounded-lg font-semibold hover:bg-kuru-success/90 transition-all shadow-md hover:shadow-lg flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
-                Add Category
+                add category
             </a>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for category in categories %}
-        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-            <div class="bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-4">
-                <h3 class="text-xl font-bold text-white">{{ category.name }}</h3>
-            </div>
-            <div class="p-6">
-                <p class="text-gray-600 mb-4">{{ category.description|default:"No description" }}</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-2xl font-bold text-pink-600">{{ category.items.count }}</span>
-                    <span class="text-sm text-gray-500">items</span>
-                </div>
+    <!-- Categories Table -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        {% if categories %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-kuru-brown">
+                    <tr>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                            category name
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                            description
+                        </th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                            item count
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for category in categories %}
+                    <tr class="hover:bg-kuru-beige transition-colors duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-bold text-kuru-brown">{{ category.name }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-600">
+                                {{ category.description|default:"—" }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-3 py-1 rounded text-sm font-semibold bg-kuru-orange/20 text-kuru-orange">
+                                {{ category.items.count }} item{{ category.items.count|pluralize }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <svg class="mx-auto h-16 w-16 text-kuru-brown/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-kuru-brown">no categories yet</h3>
+            <p class="mt-2 text-sm text-gray-500">create your first category to organize items</p>
+            <div class="mt-6">
+                <a href="{% url 'items:category_create' %}"
+                   class="inline-flex items-center px-6 py-3 bg-kuru-success text-white font-semibold rounded-lg hover:bg-kuru-success/90 transition-all duration-200 shadow-md hover:shadow-lg">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    add category
+                </a>
             </div>
         </div>
-        {% empty %}
-        <div class="col-span-full">
-            <div class="bg-white rounded-xl shadow-md p-12 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                </svg>
-                <p class="mt-4 text-lg font-semibold text-gray-900">No categories yet</p>
-                <p class="text-gray-500">Create your first category to organize items</p>
-            </div>
-        </div>
-        {% endfor %}
+        {% endif %}
     </div>
 </div>
 {% endblock %}

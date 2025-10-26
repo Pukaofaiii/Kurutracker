@@ -1,71 +1,88 @@
 {% extends 'base.html' %}
 
-{% block title %}Pending Requests - Kurutracker{% endblock %}
+{% block title %}pending requests - KURU Tracker{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
     <!-- Header -->
     <div>
-        <h1 class="text-3xl font-bold text-gray-900">Pending Requests</h1>
-        <p class="text-gray-600 mt-1">Manage transfer and return requests</p>
+        <h1 class="text-3xl font-bold text-kuru-brown">pending requests</h1>
+        <p class="text-gray-600 mt-1">manage transfer and return requests</p>
     </div>
 
     <!-- Requests to Accept -->
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Action Required</h2>
-            <p class="text-orange-100 text-sm">{{ requests_to_accept.count }} request(s) waiting for your approval</p>
+        <div class="bg-kuru-orange px-6 py-4 border-b-2 border-kuru-orange/20">
+            <h2 class="text-xl font-bold text-white">action required</h2>
+            <p class="text-white/80 text-sm">{{ requests_to_accept.count }} request(s) waiting for your approval</p>
         </div>
         <div class="p-6">
             {% if requests_to_accept %}
             <div class="space-y-4">
                 {% for request in requests_to_accept %}
-                <div class="p-5 bg-orange-50 rounded-lg border-l-4 border-orange-500 hover:bg-orange-100 transition-colors duration-200">
+                <div class="p-5 bg-kuru-orange/10 rounded-xl border-l-4 border-kuru-orange hover:bg-kuru-orange/20 transition-colors duration-200">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
-                            <div class="flex items-center mb-3">
-                                <span class="px-3 py-1 rounded-full text-xs font-medium mr-2
-                                    {% if request.request_type == 'ASSIGN' %}bg-blue-100 text-blue-800
-                                    {% else %}bg-purple-100 text-purple-800{% endif %}">
+                            <div class="flex items-center mb-3 flex-wrap gap-2">
+                                <span class="px-3 py-1 rounded text-xs font-medium
+                                    {% if request.request_type == 'ASSIGN' %}bg-kuru-green/20 text-kuru-green
+                                    {% else %}bg-kuru-blue/20 text-kuru-blue{% endif %}">
                                     {{ request.get_request_type_display }}
                                 </span>
-                                <h3 class="font-bold text-gray-900 text-lg">{{ request.item.name }}</h3>
+                                {% with days=request.days_until_expiry %}
+                                {% if days is not None %}
+                                    {% if days == 0 %}
+                                        <span class="px-3 py-1 rounded text-xs font-bold bg-kuru-danger/30 text-kuru-danger animate-pulse">
+                                            ⚠️ expiring today
+                                        </span>
+                                    {% elif days == 1 %}
+                                        <span class="px-3 py-1 rounded text-xs font-bold bg-kuru-danger/20 text-kuru-danger">
+                                            ⚠️ expires tomorrow
+                                        </span>
+                                    {% elif days == 2 %}
+                                        <span class="px-3 py-1 rounded text-xs font-medium bg-kuru-yellow/20 text-kuru-yellow">
+                                            ⚠️ expires in {{ days }} days
+                                        </span>
+                                    {% endif %}
+                                {% endif %}
+                                {% endwith %}
+                                <h3 class="font-bold text-kuru-brown text-lg">{{ request.item.name }}</h3>
                             </div>
 
                             <div class="grid grid-cols-2 gap-4 mb-3">
                                 <div>
-                                    <p class="text-sm text-gray-600"><span class="font-medium">Asset ID:</span> {{ request.item.asset_id }}</p>
-                                    <p class="text-sm text-gray-600"><span class="font-medium">From:</span> {{ request.from_user.email }}</p>
+                                    <p class="text-sm text-gray-600"><span class="font-medium">asset ID:</span> {{ request.item.asset_id }}</p>
+                                    <p class="text-sm text-gray-600"><span class="font-medium">from:</span> {{ request.from_user.email }}</p>
                                 </div>
                                 <div>
-                                    <p class="text-sm text-gray-600"><span class="font-medium">Status:</span>
+                                    <p class="text-sm text-gray-600"><span class="font-medium">status:</span>
                                         <span class="px-2 py-0.5 rounded text-xs font-medium
-                                            {% if request.item.status == 'NORMAL' %}bg-green-100 text-green-800
-                                            {% elif request.item.status == 'DAMAGED' %}bg-red-100 text-red-800
-                                            {% elif request.item.status == 'PENDING_INSPECTION' %}bg-yellow-100 text-yellow-800
-                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                            {% if request.item.status == 'NORMAL' %}bg-kuru-blue/20 text-kuru-blue
+                                            {% elif request.item.status == 'DAMAGED' %}bg-kuru-danger/20 text-kuru-danger
+                                            {% elif request.item.status == 'PENDING_INSPECTION' %}bg-kuru-yellow/20 text-kuru-yellow
+                                            {% else %}bg-gray-100 text-gray-700{% endif %}">
                                             {{ request.item.get_status_display }}
                                         </span>
                                     </p>
-                                    <p class="text-sm text-gray-600"><span class="font-medium">Requested:</span> {{ request.created_at|date:"M d, Y" }}</p>
+                                    <p class="text-sm text-gray-600"><span class="font-medium">requested:</span> {{ request.created_at|date:"M d, Y" }}</p>
                                 </div>
                             </div>
 
                             {% if request.notes %}
-                            <div class="bg-white p-3 rounded border border-orange-200 mb-3">
-                                <p class="text-sm text-gray-700"><span class="font-medium">Notes:</span> {{ request.notes }}</p>
+                            <div class="bg-white p-3 rounded border border-kuru-orange/30 mb-3">
+                                <p class="text-sm text-gray-700"><span class="font-medium">notes:</span> {{ request.notes }}</p>
                             </div>
                             {% endif %}
                         </div>
 
                         <div class="flex flex-col space-y-2 ml-6">
                             <a href="{% url 'transfers:accept_request' request.pk %}"
-                               class="px-5 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 font-medium text-center whitespace-nowrap">
-                                Accept
+                               class="px-5 py-2 bg-kuru-success text-white rounded-lg hover:bg-kuru-success/90 transition-colors duration-200 font-medium text-center whitespace-nowrap shadow-sm">
+                                accept
                             </a>
                             <a href="{% url 'transfers:reject_request' request.pk %}"
-                               class="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium text-center whitespace-nowrap">
-                                Reject
+                               class="px-5 py-2 bg-kuru-danger text-white rounded-lg hover:bg-kuru-danger/90 transition-colors duration-200 font-medium text-center whitespace-nowrap shadow-sm">
+                                reject
                             </a>
                         </div>
                     </div>
@@ -77,7 +94,7 @@
                 <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <p class="text-gray-500 text-lg">No pending requests to review</p>
+                <p class="text-gray-500 text-lg">no pending requests to review</p>
             </div>
             {% endif %}
         </div>
@@ -85,32 +102,55 @@
 
     <!-- Requests Sent -->
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="bg-gradient-to-r from-gray-600 to-gray-800 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Requests Sent</h2>
-            <p class="text-gray-300 text-sm">{{ requests_sent.count }} request(s) waiting for others to respond</p>
+        <div class="bg-kuru-brown px-6 py-4 border-b-2 border-kuru-brown/20">
+            <h2 class="text-xl font-bold text-white">requests sent</h2>
+            <p class="text-white/80 text-sm">{{ requests_sent.count }} request(s) waiting for others to respond</p>
         </div>
         <div class="p-6">
             {% if requests_sent %}
             <div class="space-y-3">
                 {% for request in requests_sent %}
-                <div class="p-4 bg-gray-50 rounded-lg border-l-4 border-gray-500">
+                <div class="p-4 bg-gray-50 rounded-xl border-l-4 border-gray-400">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
-                            <div class="flex items-center mb-2">
-                                <span class="px-2 py-1 rounded-full text-xs font-medium mr-2
-                                    {% if request.request_type == 'ASSIGN' %}bg-blue-100 text-blue-800
-                                    {% else %}bg-purple-100 text-purple-800{% endif %}">
+                            <div class="flex items-center mb-2 flex-wrap gap-2">
+                                <span class="px-2 py-1 rounded text-xs font-medium
+                                    {% if request.request_type == 'ASSIGN' %}bg-kuru-green/20 text-kuru-green
+                                    {% else %}bg-kuru-blue/20 text-kuru-blue{% endif %}">
                                     {{ request.get_request_type_display }}
                                 </span>
-                                <p class="font-semibold text-gray-900">{{ request.item.name }}</p>
+                                {% with days=request.days_until_expiry %}
+                                {% if days is not None %}
+                                    {% if days == 0 %}
+                                        <span class="px-2 py-1 rounded text-xs font-bold bg-kuru-danger/30 text-kuru-danger animate-pulse">
+                                            ⚠️ expiring today
+                                        </span>
+                                    {% elif days == 1 %}
+                                        <span class="px-2 py-1 rounded text-xs font-bold bg-kuru-danger/20 text-kuru-danger">
+                                            ⚠️ expires tomorrow
+                                        </span>
+                                    {% elif days == 2 %}
+                                        <span class="px-2 py-1 rounded text-xs font-medium bg-kuru-yellow/20 text-kuru-yellow">
+                                            ⚠️ expires in {{ days }} days
+                                        </span>
+                                    {% endif %}
+                                {% endif %}
+                                {% endwith %}
+                                <p class="font-semibold text-kuru-brown">{{ request.item.name }}</p>
                             </div>
-                            <p class="text-sm text-gray-600">Asset ID: {{ request.item.asset_id }}</p>
+                            <p class="text-sm text-gray-600">asset ID: {{ request.item.asset_id }}</p>
                             <p class="text-sm text-gray-600 mt-1">
-                                <span class="font-medium">To:</span> {{ request.to_user.email }}
+                                <span class="font-medium">to:</span> {{ request.to_user.email }}
                             </p>
-                            <p class="text-xs text-gray-500 mt-1">Sent {{ request.created_at|date:"M d, Y" }}</p>
+                            <p class="text-xs text-gray-500 mt-1">sent {{ request.created_at|date:"M d, Y" }}
+                                {% with days=request.days_until_expiry %}
+                                {% if days is not None %}
+                                    • expires in {{ days }} day{{ days|pluralize }}
+                                {% endif %}
+                                {% endwith %}
+                            </p>
                         </div>
-                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium ml-4">Pending</span>
+                        <span class="px-3 py-1 bg-kuru-yellow/20 text-kuru-yellow rounded text-sm font-medium ml-4">pending</span>
                     </div>
                 </div>
                 {% endfor %}
@@ -120,7 +160,7 @@
                 <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                 </svg>
-                <p class="text-gray-500 text-lg">No outgoing requests</p>
+                <p class="text-gray-500 text-lg">no outgoing requests</p>
             </div>
             {% endif %}
         </div>

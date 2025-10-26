@@ -1,62 +1,81 @@
 {% extends 'base.html' %}
 
-{% block title %}Item Found - Kurutracker{% endblock %}
+{% block title %}item found - KURU Tracker{% endblock %}
 
 {% block content %}
+<style>
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #06D6A0;
+        box-shadow: 0 0 0 3px rgba(6, 214, 160, 0.1);
+    }
+</style>
+
 <div class="max-w-2xl mx-auto">
-    <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
-        <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-12 text-center text-white">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-kuru-success px-8 py-12 text-center text-white">
             <svg class="w-20 h-20 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <h1 class="text-3xl font-bold mb-2">Lost Item Found</h1>
-            <p class="text-green-100">Assess condition and return to system</p>
+            <h1 class="text-3xl font-bold mb-2">lost item found</h1>
+            <p class="text-white/90">assess condition and return to system</p>
         </div>
 
         <div class="p-8">
             <div class="mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">Item Information</h2>
-                <div class="bg-gray-50 rounded-lg p-6">
-                    <p class="text-lg font-bold text-gray-900">{{ item.name }}</p>
+                <h2 class="text-xl font-bold text-kuru-brown mb-4">item information</h2>
+                <div class="bg-kuru-beige rounded-xl p-6 border-2 border-kuru-brown/10">
+                    <p class="text-lg font-bold text-kuru-brown">{{ item.name }}</p>
                     <p class="text-gray-600">{{ item.asset_id }}</p>
-                    <p class="mt-2"><span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-bold">Currently: LOST</span></p>
-                    <p class="mt-4 text-sm"><strong>Responsible Owner:</strong> {{ item.current_owner.email }}</p>
+                    <p class="mt-2">
+                        <span class="inline-flex items-center px-3 py-1 rounded text-xs font-semibold bg-kuru-danger/20 text-kuru-danger">
+                            currently: lost
+                        </span>
+                    </p>
+                    <p class="mt-4 text-sm text-gray-700"><span class="font-bold text-kuru-brown">responsible owner:</span> {{ item.current_owner.email }}</p>
                 </div>
             </div>
 
-            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded mb-6">
-                <p class="font-bold text-green-800">Recovery Process:</p>
-                <ul class="text-sm text-green-700 mt-2 space-y-1">
-                    <li>• Assess the item's current condition</li>
-                    <li>• Select appropriate status below</li>
-                    <li>• Owner will be notified of recovery</li>
-                    <li>• Item returns to active inventory</li>
+            <div class="bg-kuru-success/10 border-l-4 border-kuru-success p-4 rounded-xl mb-6">
+                <p class="font-bold text-kuru-brown">recovery process:</p>
+                <ul class="text-sm text-gray-700 mt-2 space-y-1">
+                    <li>• assess the item's current condition</li>
+                    <li>• select appropriate status below</li>
+                    <li>• owner will be notified of recovery</li>
+                    <li>• item returns to active inventory</li>
                 </ul>
             </div>
 
             <form method="post">
                 {% csrf_token %}
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Item Condition *</label>
-                    <select name="new_status" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
-                        <option value="">-- Select Condition --</option>
-                        <option value="NORMAL">Normal - Item is in good working condition</option>
-                        <option value="DAMAGED">Damaged - Item has damage but may be usable</option>
-                        <option value="REPAIR">Repair Needed - Item requires repair before use</option>
+                    <label class="block text-sm font-bold text-kuru-brown mb-2">item condition <span class="text-kuru-danger">*</span></label>
+                    <select name="new_status" required class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg">
+                        <option value="">-- select condition --</option>
+                        <option value="NORMAL">normal - item is in good working condition</option>
+                        <option value="DAMAGED">damaged - item has damage but may be usable</option>
+                        <option value="REPAIR">repair needed - item requires repair before use</option>
                     </select>
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Recovery Notes (Optional)</label>
-                    <textarea name="notes" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Where was it found? Any visible damage? Other observations..."></textarea>
+                    <label class="block text-sm font-bold text-kuru-brown mb-2">recovery notes (optional)</label>
+                    <textarea name="notes" rows="4" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg" placeholder="where was it found? any visible damage? other observations..."></textarea>
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <a href="{% url 'audit:audit_lost_items' %}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-all">
-                        Cancel
+                <div class="flex items-center justify-between pt-6 border-t-2 border-gray-100">
+                    <a href="{% url 'audit:audit_lost_items' %}" class="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        cancel
                     </a>
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-bold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl">
-                        Recover Item
+                    <button type="submit" class="inline-flex items-center px-8 py-3 bg-kuru-success text-white rounded-lg font-bold hover:bg-kuru-success/90 transition-all duration-200 shadow-md hover:shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        recover item
                     </button>
                 </div>
             </form>

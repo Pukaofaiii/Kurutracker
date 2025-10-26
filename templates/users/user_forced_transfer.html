@@ -1,26 +1,26 @@
 {% extends 'base.html' %}
 
-{% block title %}Forced Transfer - Kurutracker{% endblock %}
+{% block title %}forced transfer - KURU Tracker{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto space-y-6">
-    <div class="bg-gradient-to-r from-orange-600 to-red-600 rounded-xl shadow-lg p-8 text-white">
-        <h1 class="text-3xl font-bold mb-2">Forced Transfer</h1>
-        <p class="text-orange-100">Transfer all items from this user</p>
+    <div class="bg-white rounded-xl shadow-md p-8 border-l-4 border-kuru-orange">
+        <h1 class="text-3xl font-bold text-kuru-brown mb-2">forced transfer</h1>
+        <p class="text-gray-600">transfer all items from this user</p>
     </div>
 
     <div class="bg-white rounded-xl shadow-md p-8">
-        <div class="mb-6 bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
-            <p class="font-bold text-orange-800">Manager Action Only</p>
-            <p class="text-sm text-orange-700">This will forcibly transfer all items without requiring approval.</p>
+        <div class="mb-6 bg-kuru-orange/10 border-l-4 border-kuru-orange p-4 rounded-xl">
+            <p class="font-bold text-kuru-orange">manager action only</p>
+            <p class="text-sm text-kuru-brown">this will forcibly transfer all items without requiring approval.</p>
         </div>
 
         <div class="mb-8">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">From User</h2>
-            <div class="bg-gray-50 rounded-lg p-6">
-                <p class="text-lg font-bold text-gray-900">{{ source_user.get_full_name }}</p>
+            <h2 class="text-xl font-bold text-kuru-brown mb-4">from user</h2>
+            <div class="bg-kuru-beige rounded-xl p-6">
+                <p class="text-lg font-bold text-kuru-brown">{{ source_user.get_full_name }}</p>
                 <p class="text-gray-600">{{ source_user.email }}</p>
-                <p class="mt-2 text-sm text-gray-500">Currently holds {{ item_count }} items</p>
+                <p class="mt-2 text-sm text-gray-600">currently holds {{ item_count }} items</p>
             </div>
         </div>
 
@@ -28,35 +28,50 @@
             {% csrf_token %}
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Transfer To User</label>
+                <label class="block text-sm font-semibold text-kuru-brown mb-2">transfer to user</label>
                 {{ form.target_staff }}
                 {% if form.target_staff.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.target_staff.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.target_staff.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Confirm Action</label>
+                <label class="block text-sm font-semibold text-kuru-brown mb-2">confirm action</label>
                 <div class="flex items-start">
                     {{ form.confirm }}
-                    <label for="{{ form.confirm.id_for_label }}" class="ml-3 text-sm text-gray-700">
+                    <label for="{{ form.confirm.id_for_label }}" class="ml-3 text-sm text-kuru-brown">
                         {{ form.confirm.label }}
                     </label>
                 </div>
                 {% if form.confirm.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.confirm.errors.0 }}</p>
+                <p class="mt-1 text-sm text-kuru-danger">{{ form.confirm.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <div class="flex items-center justify-between pt-6">
-                <button type="button" onclick="history.back()" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all">
-                    Cancel
+                <button type="button" onclick="history.back()" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-all">
+                    cancel
                 </button>
-                <button type="submit" class="px-8 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl font-bold hover:from-orange-700 hover:to-red-700 transition-all shadow-lg hover:shadow-xl">
-                    Force Transfer All Items
+                <button type="submit" class="px-8 py-3 bg-kuru-orange text-white rounded-lg font-bold hover:bg-kuru-orange/90 transition-all shadow-md hover:shadow-lg">
+                    force transfer all items
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #E5E7EB;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+    }
+    select:focus {
+        outline: none;
+        border-color: #489FB5;
+    }
+</style>
 {% endblock %}

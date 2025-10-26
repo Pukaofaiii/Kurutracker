@@ -11,6 +11,7 @@ from .models import TransferRequest, TransferLog
 from .forms import TransferRequestForm, ReturnRequestForm, AcceptReturnForm, AcceptTransferForm, RejectRequestForm
 from items.models import Item
 from django.db.models import Count, Q
+from notifications.utils import notify_new_request, notify_request_accepted, notify_request_rejected
 
 
 @teacher_or_staff_required
@@ -65,10 +66,27 @@ def create_transfer_request(request):
                 )
                 return redirect('items:item_detail', pk=item.pk)
 
+            # Check if item already has a pending transfer request
+            existing_pending = TransferRequest.objects.filter(
+                item=item,
+                status='PENDING'
+            ).exists()
+
+            if existing_pending:
+                messages.error(
+                    request,
+                    f"Cannot create transfer request. Item {item.asset_id} already has a pending transfer request. "
+                    f"Please wait for the existing request to be accepted or rejected first."
+                )
+                return redirect('transfers:create_transfer')
+
             transfer = form.save(commit=False)
             transfer.from_user = request.user
             transfer.request_type = 'ASSIGN'
             transfer.save()
+
+            # Send notification to recipient
+            notify_new_request(transfer)
 
             messages.success(
                 request,
@@ -113,6 +131,9 @@ def create_return_request(request, item_id):
                 item=item,
                 notes=form.cleaned_data.get('notes', '')
             )
+
+            # Send notification to staff
+            notify_new_request(transfer)
 
             # Set item status to pending inspection
             item.status = 'PENDING_INSPECTION'
@@ -198,6 +219,10 @@ def accept_request(request, pk):
                 new_status = form.cleaned_data['new_status']
                 try:
                     transfer.accept(request.user, new_status=new_status)
+
+                    # Send notification to requester
+                    notify_request_accepted(transfer)
+
                     messages.success(
                         request,
                         f"Return accepted. Item {transfer.item.asset_id} status set to {transfer.item.get_status_display()}."
@@ -221,6 +246,10 @@ def accept_request(request, pk):
             current_location = form.cleaned_data['current_location']
             try:
                 transfer.accept(request.user, current_location=current_location)
+
+                # Send notification to requester
+                notify_request_accepted(transfer)
+
                 messages.success(
                     request,
                     f"Transfer accepted. You now own {transfer.item.asset_id}."
@@ -265,6 +294,10 @@ def reject_request(request, pk):
             reason = form.cleaned_data['reason']
             try:
                 transfer.reject(request.user, reason=reason)
+
+                # Send notification to requester
+                notify_request_rejected(transfer, reason)
+
                 messages.success(
                     request,
                     f"Request rejected. {transfer.from_user.email} has been notified."

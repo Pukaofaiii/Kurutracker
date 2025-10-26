@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}bulk status change - KURU Tracker{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex items-center">
+        <a href="{% url 'items:item_list' %}"
+           class="mr-4 p-2 text-gray-600 hover:text-kuru-brown hover:bg-kuru-beige rounded-lg transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+        </a>
+        <div>
+            <h1 class="text-3xl font-bold text-kuru-brown">bulk status change</h1>
+            <p class="text-gray-600 mt-1">change status for multiple items at once</p>
+        </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="bg-kuru-yellow/10 border-l-4 border-kuru-yellow p-6 rounded-xl">
+        <div class="flex items-start">
+            <svg class="w-6 h-6 text-kuru-yellow mr-3 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <div>
+                <h3 class="text-lg font-bold text-kuru-yellow mb-2">bulk status update</h3>
+                <p class="text-gray-700">
+                    You are about to change the status for <strong>{{ items.count }} item(s)</strong>.
+                    Select the new status from the dropdown below.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Items List -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-kuru-yellow px-6 py-4 border-b-2 border-kuru-yellow/20">
+            <h2 class="text-xl font-bold text-white">selected items ({{ items.count }})</h2>
+        </div>
+        <div class="p-6">
+            <div class="space-y-3 max-h-96 overflow-y-auto">
+                {% for item in items %}
+                <div class="flex items-center p-4 bg-gray-50 rounded-lg border-l-4 border-kuru-yellow">
+                    {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-12 h-12 object-cover rounded-lg border-2 border-gray-200 mr-4">
+                    {% else %}
+                    <div class="w-12 h-12 bg-kuru-beige rounded-lg flex items-center justify-center border-2 border-gray-200 mr-4">
+                        <svg class="w-6 h-6 text-kuru-brown/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                    </div>
+                    {% endif %}
+                    <div class="flex-1">
+                        <p class="font-bold text-kuru-brown">{{ item.asset_id }} - {{ item.name }}</p>
+                        <p class="text-sm text-gray-600">
+                            Current Status:
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold
+                                {% if item.status == 'NORMAL' %}bg-kuru-blue/20 text-kuru-blue
+                                {% elif item.status == 'DAMAGED' %}bg-kuru-danger/20 text-kuru-danger
+                                {% elif item.status == 'REPAIR' %}bg-kuru-yellow/20 text-kuru-yellow
+                                {% elif item.status == 'LOST' %}bg-kuru-orange/20 text-kuru-orange
+                                {% elif item.status == 'PENDING_INSPECTION' %}bg-kuru-success/20 text-kuru-success
+                                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                {{ item.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Selection Form -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <form method="post">
+            {% csrf_token %}
+            {% for item_id in item_ids %}
+            <input type="hidden" name="item_ids" value="{{ item_id }}">
+            {% endfor %}
+
+            <div class="mb-6">
+                <label for="new_status" class="block text-sm font-semibold text-kuru-brown mb-2">
+                    new status <span class="text-kuru-danger">*</span>
+                </label>
+                <select name="new_status" id="new_status" required
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-kuru-yellow focus:outline-none transition-colors duration-200 text-base">
+                    <option value="">select a status...</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex space-x-4">
+                <button type="submit"
+                        class="flex-1 px-6 py-3 bg-kuru-yellow text-white rounded-lg hover:bg-kuru-yellow/90 transition-all duration-200 shadow-md hover:shadow-lg font-semibold">
+                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    update status for {{ items.count }} item(s)
+                </button>
+                <a href="{% url 'items:item_list' %}"
+                   class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-semibold text-center flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+</style>
+{% endblock %}

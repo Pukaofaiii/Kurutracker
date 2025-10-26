@@ -1,160 +1,339 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit User - Kurutracker{% endblock %}
+{% block title %}{{ user_obj.get_full_name }} - KURU Tracker{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto space-y-6">
-    <!-- Header -->
-    <div class="flex items-center">
-        <a href="{% url 'users:user_detail' user_obj.pk %}"
-           class="mr-4 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
-        </a>
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900">Edit User</h1>
-            <p class="text-gray-600 mt-1">{{ user_obj.email }}</p>
+<div class="space-y-6">
+    <!-- User Header -->
+    <div class="bg-white rounded-xl shadow-md p-8 border-l-4 border-kuru-blue">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-20 h-20 bg-kuru-brown rounded-xl flex items-center justify-center text-white text-3xl font-bold mr-6">
+                    {{ user_obj.first_name.0|default:"U" }}{{ user_obj.last_name.0|default:"" }}
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-kuru-brown mb-2">{{ user_obj.get_full_name }}</h1>
+                    <p class="text-gray-600">{{ user_obj.email }}</p>
+                    <div class="flex items-center space-x-2 mt-2">
+                        <span class="px-3 py-1 {% if user_obj.is_manager %}bg-kuru-orange{% elif user_obj.is_staff_member %}bg-kuru-blue{% else %}bg-kuru-green{% endif %} rounded-lg font-semibold text-white text-sm">
+                            {{ user_obj.get_role_display }}
+                        </span>
+                        {% if user_obj.is_active %}
+                        <span class="inline-flex items-center px-3 py-1 rounded text-xs font-semibold bg-kuru-success/20 text-kuru-success">
+                            <span class="w-2 h-2 bg-kuru-success rounded-full mr-2 animate-pulse"></span>active
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-3 py-1 rounded text-xs font-semibold bg-kuru-danger/20 text-kuru-danger">
+                            <span class="w-2 h-2 bg-kuru-danger rounded-full mr-2"></span>inactive
+                        </span>
+                        {% endif %}
+                        {% if user_obj.is_auditor %}
+                        <span class="inline-flex items-center px-3 py-1 rounded text-xs font-semibold bg-kuru-yellow/20 text-kuru-yellow border border-kuru-yellow/30">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            </svg>
+                            auditor
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <a href="{% url 'users:user_list' %}"
+               class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-semibold flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                back to list
+            </a>
         </div>
     </div>
 
     <!-- Generated Password Display -->
     {% if generated_password %}
-    <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-2xl p-8 text-white animate-pulse">
+    <div class="bg-kuru-success rounded-xl shadow-md p-8 text-white">
         <div class="flex items-center mb-4">
             <svg class="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/>
             </svg>
             <div>
-                <h3 class="text-xl font-bold">New Password Generated</h3>
-                <p class="text-green-100 text-sm">Save this now! It will only be shown once.</p>
+                <h3 class="text-xl font-bold">new password generated</h3>
+                <p class="text-white/90 text-sm">save this now! it will only be shown once.</p>
             </div>
         </div>
-
-        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4 mb-4">
+        <div class="bg-white/20 rounded-lg p-4 mb-4">
             <div class="flex items-center justify-between">
                 <code id="generatedPassword" class="text-2xl font-mono font-bold tracking-wider">{{ generated_password }}</code>
-                <button onclick="copyPassword()" id="copyBtn" class="ml-4 px-4 py-2 bg-white text-green-600 rounded-lg font-bold hover:bg-green-50 transition-all flex items-center space-x-2">
+                <button onclick="copyPassword()" id="copyBtn" class="ml-4 px-4 py-2 bg-white text-kuru-success rounded-lg font-bold hover:bg-white/90 transition-all flex items-center space-x-2 shadow-md">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                     </svg>
-                    <span id="copyText">Copy</span>
+                    <span id="copyText">copy</span>
                 </button>
             </div>
         </div>
-
-        <div class="bg-amber-500/30 border-2 border-amber-300 rounded-lg p-4">
-            <p class="font-bold mb-1">Share this password securely with {{ user_obj.first_name }}</p>
+        <div class="bg-kuru-yellow/20 border-2 border-kuru-yellow/50 rounded-lg p-4">
+            <p class="font-bold mb-1">share this password securely with {{ user_obj.first_name }}</p>
         </div>
     </div>
     {% endif %}
 
-    <!-- Form Card -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">User Information</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column - User Info & Edit Form -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- User Information Display -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-xl font-bold text-kuru-brown mb-4">account information</h2>
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-semibold text-gray-500">email</dt>
+                        <dd class="mt-1 text-sm text-kuru-brown">{{ user_obj.email }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-semibold text-gray-500">phone</dt>
+                        <dd class="mt-1 text-sm text-kuru-brown">{{ user_obj.phone_number|default:"not provided" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-semibold text-gray-500">department</dt>
+                        <dd class="mt-1 text-sm text-kuru-brown">{{ user_obj.department|default:"not assigned" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-semibold text-gray-500">auditor permission</dt>
+                        <dd class="mt-1">
+                            {% if user_obj.is_auditor %}
+                            <span class="inline-flex items-center px-3 py-1 rounded text-xs font-semibold bg-kuru-yellow/20 text-kuru-yellow">
+                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                                granted
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-600">
+                                not granted
+                            </span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-semibold text-gray-500">joined</dt>
+                        <dd class="mt-1 text-sm text-kuru-brown">{{ user_obj.created_at|date:"F d, Y" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-semibold text-gray-500">last updated</dt>
+                        <dd class="mt-1 text-sm text-kuru-brown">{{ user_obj.updated_at|date:"F d, Y" }}</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- Edit Form -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-kuru-orange px-6 py-4 border-b-2 border-kuru-orange/20">
+                    <h2 class="text-xl font-bold text-white">edit user information</h2>
+                </div>
+
+                <form method="post" class="p-6 space-y-6">
+                    {% csrf_token %}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-kuru-brown mb-2">first name</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <p class="mt-1 text-sm text-kuru-danger">{{ form.first_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-kuru-brown mb-2">last name</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <p class="mt-1 text-sm text-kuru-danger">{{ form.last_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-kuru-brown mb-2">email address</label>
+                        {{ form.email }}
+                        <p class="mt-1 text-sm text-gray-500">email cannot be changed</p>
+                        {% if form.email.errors %}
+                        <p class="mt-1 text-sm text-kuru-danger">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-kuru-brown mb-2">
+                            role
+                            {% if user.role != 'MANAGER' %}
+                            <span class="text-kuru-yellow text-xs">(manager permission required to edit)</span>
+                            {% endif %}
+                        </label>
+                        {{ form.role }}
+                        {% if form.role.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.role.help_text }}</p>
+                        {% endif %}
+                        {% if form.role.errors %}
+                        <p class="mt-1 text-sm text-kuru-danger">{{ form.role.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-kuru-brown mb-2">department (optional)</label>
+                            {{ form.department }}
+                            {% if form.department.errors %}
+                            <p class="mt-1 text-sm text-kuru-danger">{{ form.department.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-kuru-brown mb-2">phone number (optional)</label>
+                            {{ form.phone_number }}
+                            {% if form.phone_number.errors %}
+                            <p class="mt-1 text-sm text-kuru-danger">{{ form.phone_number.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-bold text-kuru-brown mb-4">security options</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                {{ form.reset_password }}
+                                <label for="{{ form.reset_password.id_for_label }}" class="ml-3">
+                                    <span class="block text-sm font-semibold text-kuru-brown">{{ form.reset_password.label }}</span>
+                                    <span class="block text-sm text-gray-500">{{ form.reset_password.help_text }}</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-4 pt-4 border-t border-gray-200">
+                        <button type="submit"
+                                class="flex-1 px-6 py-3 bg-kuru-orange text-white rounded-lg hover:bg-kuru-orange/90 transition-all duration-200 shadow-md hover:shadow-lg font-semibold">
+                            save changes
+                        </button>
+                        <a href="{% url 'users:user_list' %}"
+                           class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-semibold">
+                            cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Current Items -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-xl font-bold text-kuru-brown mb-4">current items ({{ user_obj.get_item_count }})</h2>
+                {% if user_obj.current_items.all %}
+                <div class="space-y-2">
+                    {% for item in user_obj.current_items.all %}
+                    <a href="{% url 'items:item_detail' item.pk %}" class="block p-4 bg-kuru-beige hover:bg-kuru-beige/70 rounded-lg transition-colors">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-bold text-kuru-brown">{{ item.name }}</p>
+                                <p class="text-sm text-gray-600">{{ item.asset_id }}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded text-xs font-semibold
+                                {% if item.status == 'NORMAL' %}bg-kuru-blue/20 text-kuru-blue
+                                {% elif item.status == 'DAMAGED' %}bg-kuru-danger/20 text-kuru-danger
+                                {% elif item.status == 'REPAIR' %}bg-kuru-yellow/20 text-kuru-yellow
+                                {% else %}bg-gray-100 text-gray-700{% endif %}">{{ item.get_status_display }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500">no items currently held</p>
+                {% endif %}
+            </div>
         </div>
 
-        <form method="post" class="p-6 space-y-6">
-            {% csrf_token %}
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                    {{ form.first_name }}
-                    {% if form.first_name.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
-                    {% endif %}
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                    {{ form.last_name }}
-                    {% if form.last_name.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                {{ form.email }}
-                <p class="mt-1 text-sm text-gray-500">Email cannot be changed</p>
-                {% if form.email.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
-                {% endif %}
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Role
-                    {% if user.role != 'MANAGER' %}
-                    <span class="text-amber-600 text-xs">(Manager permission required to edit)</span>
-                    {% endif %}
-                </label>
-                {{ form.role }}
-                {% if form.role.help_text %}
-                <p class="mt-1 text-sm text-gray-500">{{ form.role.help_text }}</p>
-                {% endif %}
-                {% if form.role.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ form.role.errors.0 }}</p>
-                {% endif %}
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Department (Optional)</label>
-                    {{ form.department }}
-                    {% if form.department.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.department.errors.0 }}</p>
-                    {% endif %}
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number (Optional)</label>
-                    {{ form.phone_number }}
-                    {% if form.phone_number.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.phone_number.errors.0 }}</p>
+        <!-- Right Column - Actions -->
+        <div class="space-y-6">
+            <!-- Danger Zone -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-xl font-bold text-kuru-brown mb-4">account status</h2>
+                <div class="space-y-3">
+                    {% if user_obj.is_active %}
+                    <a href="{% url 'users:user_deactivate' user_obj.pk %}"
+                       class="block w-full px-4 py-3 bg-kuru-danger text-white rounded-lg font-semibold hover:bg-kuru-danger/90 transition-all text-center shadow-md hover:shadow-lg">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 715.636 5.636m12.728 12.728L5.636 5.636"/>
+                        </svg>
+                        deactivate user
+                    </a>
+                    <p class="text-xs text-gray-500 text-center">user will lose access to their account</p>
+                    {% else %}
+                    <a href="{% url 'users:user_activate' user_obj.pk %}"
+                       class="block w-full px-4 py-3 bg-kuru-success text-white rounded-lg font-semibold hover:bg-kuru-success/90 transition-all text-center shadow-md hover:shadow-lg">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        activate user
+                    </a>
+                    <p class="text-xs text-gray-500 text-center">user will regain access to their account</p>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="border-t border-gray-200 pt-6">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">Security Options</h3>
+            <!-- Manager Actions -->
+            {% if user.is_manager %}
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-xl font-bold text-kuru-brown mb-4">manager actions</h2>
+                <div class="space-y-3">
+                    <a href="{% url 'users:user_forced_transfer' user_obj.pk %}"
+                       class="block w-full px-4 py-3 bg-kuru-orange/10 text-kuru-orange rounded-lg font-semibold hover:bg-kuru-orange/20 transition-all text-center border-2 border-kuru-orange/30">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                        </svg>
+                        forced transfer
+                    </a>
 
-                <div class="space-y-4">
-                    <div class="flex items-start">
-                        {{ form.reset_password }}
-                        <label for="{{ form.reset_password.id_for_label }}" class="ml-3">
-                            <span class="block text-sm font-medium text-gray-700">{{ form.reset_password.label }}</span>
-                            <span class="block text-sm text-gray-500">{{ form.reset_password.help_text }}</span>
-                        </label>
-                    </div>
-
-                    <div class="flex items-start">
-                        {{ form.is_active }}
-                        <label for="{{ form.is_active.id_for_label }}" class="ml-3">
-                            <span class="block text-sm font-medium text-gray-700">Account Active</span>
-                            <span class="block text-sm text-gray-500">Uncheck to deactivate this user account</span>
-                        </label>
-                    </div>
+                    {% if user_obj.is_auditor %}
+                    <a href="{% url 'users:revoke_auditor' user_obj.pk %}"
+                       class="block w-full px-4 py-3 bg-kuru-yellow/10 text-kuru-yellow rounded-lg font-semibold hover:bg-kuru-yellow/20 transition-all text-center border-2 border-kuru-yellow/30">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        revoke auditor permission
+                    </a>
+                    {% else %}
+                    <a href="{% url 'users:grant_auditor' user_obj.pk %}"
+                       class="block w-full px-4 py-3 bg-kuru-yellow/10 text-kuru-yellow rounded-lg font-semibold hover:bg-kuru-yellow/20 transition-all text-center border-2 border-kuru-yellow/30">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                        grant auditor permission
+                    </a>
+                    {% endif %}
                 </div>
             </div>
-
-            <!-- Action Buttons -->
-            <div class="flex space-x-4 pt-4 border-t border-gray-200">
-                <button type="submit"
-                        class="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-                    Save Changes
-                </button>
-                <a href="{% url 'users:user_detail' user_obj.pk %}"
-                   class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">
-                    Cancel
-                </a>
-            </div>
-        </form>
+            {% endif %}
+        </div>
     </div>
 </div>
+
+<style>
+    input[type="text"], input[type="email"], input[type="tel"], select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #E5E7EB;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus, select:focus {
+        outline: none;
+        border-color: #489FB5;
+    }
+    input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 0.25rem;
+        border: 2px solid #E5E7EB;
+        cursor: pointer;
+    }
+</style>
 
 <script>
 function copyPassword() {
@@ -162,21 +341,18 @@ function copyPassword() {
     const copyBtn = document.getElementById('copyBtn');
     const copyText = document.getElementById('copyText');
 
-    // Copy to clipboard
     navigator.clipboard.writeText(password).then(function() {
-        // Success feedback
-        copyText.textContent = '✓ Copied!';
-        copyBtn.classList.add('bg-green-600', 'text-white');
-        copyBtn.classList.remove('bg-white', 'text-green-600');
+        copyText.textContent = '✓ copied!';
+        copyBtn.classList.add('bg-kuru-success', 'text-white');
+        copyBtn.classList.remove('bg-white', 'text-kuru-success');
 
-        // Reset after 2 seconds
         setTimeout(function() {
-            copyText.textContent = 'Copy';
-            copyBtn.classList.remove('bg-green-600', 'text-white');
-            copyBtn.classList.add('bg-white', 'text-green-600');
+            copyText.textContent = 'copy';
+            copyBtn.classList.remove('bg-kuru-success', 'text-white');
+            copyBtn.classList.add('bg-white', 'text-kuru-success');
         }, 2000);
     }, function(err) {
-        copyText.textContent = '✗ Failed';
+        copyText.textContent = '✗ failed';
         console.error('Could not copy text: ', err);
     });
 }

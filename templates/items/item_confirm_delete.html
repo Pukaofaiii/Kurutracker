@@ -1,29 +1,29 @@
 {% extends 'base.html' %}
 
-{% block title %}Mark as REMOVED - {{ item.name }} - Kurutracker{% endblock %}
+{% block title %}mark as removed - {{ item.name }} - KURU Tracker{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="bg-gradient-to-r from-red-600 to-pink-600 px-6 py-4">
-            <h2 class="text-xl font-bold text-white">Mark Item as REMOVED</h2>
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-kuru-danger px-6 py-4 border-b-2 border-kuru-danger/20">
+            <h2 class="text-xl font-bold text-white">mark item as removed</h2>
         </div>
 
         <div class="p-8">
             <div class="flex items-start mb-6">
-                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
-                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-12 h-12 bg-kuru-danger/10 rounded-full flex items-center justify-center mr-4">
+                    <svg class="w-6 h-6 text-kuru-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                 </div>
                 <div class="flex-1">
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">Are you sure you want to mark this item as REMOVED?</h3>
-                    <p class="text-gray-600 mb-4">This will remove the item from active circulation. The item data will be preserved in the system for record-keeping purposes.</p>
+                    <h3 class="text-lg font-bold text-kuru-brown mb-2">are you sure you want to mark this item as removed?</h3>
+                    <p class="text-gray-600 mb-4">this will remove the item from active circulation. the item data will be preserved in the system for record-keeping purposes.</p>
 
                     <div class="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
-                        <p class="text-sm text-gray-600 mb-1"><span class="font-medium">Asset ID:</span> {{ item.asset_id }}</p>
-                        <p class="text-sm text-gray-600 mb-1"><span class="font-medium">Name:</span> {{ item.name }}</p>
-                        <p class="text-sm text-gray-600"><span class="font-medium">Current Owner:</span> {{ item.current_owner.email }}</p>
+                        <p class="text-sm text-gray-600 mb-1"><span class="font-medium">asset ID:</span> {{ item.asset_id }}</p>
+                        <p class="text-sm text-gray-600 mb-1"><span class="font-medium">name:</span> {{ item.name }}</p>
+                        <p class="text-sm text-gray-600"><span class="font-medium">current owner:</span> {{ item.current_owner.email }}</p>
                     </div>
                 </div>
             </div>
@@ -33,27 +33,27 @@
 
                 <!-- Delete Type Selection -->
                 <div class="space-y-3">
-                    <label class="block text-sm font-semibold text-gray-700 mb-3">Delete Type:</label>
+                    <label class="block text-sm font-semibold text-kuru-brown mb-3">delete type:</label>
 
                     <!-- Soft Delete Option (Default) -->
                     <div class="relative">
                         <input type="radio" id="soft_delete" name="delete_type" value="soft" checked
                                class="peer hidden">
-                        <label for="soft_delete" class="flex items-start p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all">
+                        <label for="soft_delete" class="flex items-start p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-kuru-green peer-checked:bg-kuru-green/10 transition-all">
                             <div class="flex items-center h-5">
-                                <svg class="w-5 h-5 text-blue-600 hidden peer-checked:block absolute left-6 top-6" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-5 h-5 text-kuru-green hidden peer-checked:block absolute left-6 top-6" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
-                                <div class="w-5 h-5 border-2 rounded-full peer-checked:border-blue-600 peer-checked:bg-blue-100"></div>
+                                <div class="w-5 h-5 border-2 rounded-full peer-checked:border-kuru-green peer-checked:bg-kuru-green/20"></div>
                             </div>
                             <div class="ml-3 flex-1">
-                                <p class="font-semibold text-gray-900">Soft Delete (Recommended)</p>
-                                <p class="text-sm text-gray-600 mt-1">Mark item as REMOVED. Data is preserved for audit trail and can be restored later.</p>
-                                <div class="mt-2 flex items-center text-sm text-green-600">
+                                <p class="font-semibold text-kuru-brown">soft delete (recommended)</p>
+                                <p class="text-sm text-gray-600 mt-1">mark item as REMOVED. data is preserved for audit trail and can be restored later.</p>
+                                <div class="mt-2 flex items-center text-sm text-kuru-success">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
-                                    Audit trail maintained
+                                    audit trail maintained
                                 </div>
                             </div>
                         </label>
@@ -64,28 +64,28 @@
                     <div class="relative">
                         <input type="radio" id="hard_delete" name="delete_type" value="hard"
                                class="peer hidden" onchange="toggleDeleteButton()">
-                        <label for="hard_delete" class="flex items-start p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-red-50 peer-checked:border-red-500 peer-checked:bg-red-50 transition-all">
+                        <label for="hard_delete" class="flex items-start p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-kuru-danger/10 peer-checked:border-kuru-danger peer-checked:bg-kuru-danger/10 transition-all">
                             <div class="flex items-center h-5">
-                                <svg class="w-5 h-5 text-red-600 hidden peer-checked:block absolute left-6 top-6" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-5 h-5 text-kuru-danger hidden peer-checked:block absolute left-6 top-6" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
-                                <div class="w-5 h-5 border-2 rounded-full peer-checked:border-red-600 peer-checked:bg-red-100"></div>
+                                <div class="w-5 h-5 border-2 rounded-full peer-checked:border-kuru-danger peer-checked:bg-kuru-danger/20"></div>
                             </div>
                             <div class="ml-3 flex-1">
-                                <p class="font-semibold text-gray-900">Permanent Delete <span class="text-red-600 text-xs">(MANAGER ONLY)</span></p>
-                                <p class="text-sm text-gray-600 mt-1">Permanently remove from database. This action CANNOT be undone!</p>
+                                <p class="font-semibold text-kuru-brown">permanent delete <span class="text-kuru-danger text-xs">(MANAGER ONLY)</span></p>
+                                <p class="text-sm text-gray-600 mt-1">permanently remove from database. this action CANNOT be undone!</p>
                                 <div class="mt-2 space-y-1">
-                                    <div class="flex items-center text-sm text-red-600">
+                                    <div class="flex items-center text-sm text-kuru-danger">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                         </svg>
-                                        Loses {{ transfer_count }} transfer log{{ transfer_count|pluralize }}
+                                        loses {{ transfer_count }} transfer log{{ transfer_count|pluralize }}
                                     </div>
-                                    <div class="flex items-center text-sm text-red-600">
+                                    <div class="flex items-center text-sm text-kuru-danger">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                         </svg>
-                                        Cannot be restored
+                                        cannot be restored
                                     </div>
                                 </div>
                             </div>
@@ -97,12 +97,12 @@
                 <!-- Action Buttons -->
                 <div class="flex space-x-4 pt-4">
                     <button type="submit" id="submitBtn"
-                            class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-                        <span id="btnText">Yes, Mark as REMOVED</span>
+                            class="flex-1 px-6 py-3 bg-kuru-green text-white rounded-lg hover:bg-kuru-green/90 transition-all duration-200 shadow-md hover:shadow-lg font-semibold">
+                        <span id="btnText">yes, mark as removed</span>
                     </button>
                     <a href="{% url 'items:item_detail' item.pk %}"
                        class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">
-                        Cancel
+                        cancel
                     </a>
                 </div>
             </form>
@@ -114,11 +114,11 @@
                     const btnText = document.getElementById('btnText');
 
                     if (hardDelete) {
-                        submitBtn.className = 'flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-lg hover:from-red-700 hover:to-pink-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium';
-                        btnText.textContent = 'Yes, PERMANENTLY DELETE';
+                        submitBtn.className = 'flex-1 px-6 py-3 bg-kuru-danger text-white rounded-lg hover:bg-kuru-danger/90 transition-all duration-200 shadow-md hover:shadow-lg font-semibold';
+                        btnText.textContent = 'yes, PERMANENTLY DELETE';
                     } else {
-                        submitBtn.className = 'flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium';
-                        btnText.textContent = 'Yes, Mark as REMOVED';
+                        submitBtn.className = 'flex-1 px-6 py-3 bg-kuru-green text-white rounded-lg hover:bg-kuru-green/90 transition-all duration-200 shadow-md hover:shadow-lg font-semibold';
+                        btnText.textContent = 'yes, mark as removed';
                     }
                 }
 

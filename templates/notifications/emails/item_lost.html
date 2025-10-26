@@ -3,54 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        body { font-family: 'Poppins', Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #EF4444, #DC2626); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-        .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }
-        .button { display: inline-block; padding: 12px 30px; background: #EF4444; color: white; text-decoration: none; border-radius: 8px; margin: 20px 0; }
-        .footer { text-align: center; margin-top: 30px; padding: 20px; color: #6b7280; font-size: 12px; }
-        .alert-box { background: #FEE2E2; border-left: 4px solid #EF4444; padding: 20px; margin: 20px 0; }
+        .header { background: #E84855; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #F5EFE7; padding: 30px; border: 1px solid #e5e7eb; }
+        .button { display: inline-block; padding: 12px 30px; background: #E84855; color: white; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: 600; }
+        .footer { text-align: center; margin-top: 30px; padding: 20px; color: #7A6652; font-size: 12px; }
+        .alert-box { background: white; border-left: 4px solid #E84855; padding: 20px; margin: 20px 0; border-radius: 8px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔴 Item Marked as LOST</h1>
+            <h1 style="margin: 0; font-weight: 700;">🔴 item marked as lost</h1>
         </div>
         <div class="content">
-            <p>Hello {{ recipient.get_full_name }},</p>
+            <p>hello {{ recipient.get_full_name }},</p>
 
-            <p>An item assigned to you has been marked as <strong>LOST</strong> during an audit:</p>
+            <p>an item assigned to you has been marked as <strong>lost</strong> during an audit:</p>
 
-            <div style="background: white; padding: 20px; border-left: 4px solid #EF4444; margin: 20px 0;">
-                <p><strong>Item:</strong> {{ item.asset_id }} - {{ item.name }}</p>
-                <p><strong>Status:</strong> LOST</p>
+            <div style="background: white; padding: 20px; border-left: 4px solid #E84855; margin: 20px 0; border-radius: 8px;">
+                <p style="margin: 0 0 10px 0;"><strong>item:</strong> {{ item.asset_id }} - {{ item.name }}</p>
+                <p style="margin: 0 0 10px 0;"><strong>status:</strong> lost</p>
                 {% if notes %}
-                <p><strong>Auditor Notes:</strong> {{ notes }}</p>
+                <p style="margin: 0;"><strong>auditor notes:</strong> {{ notes }}</p>
                 {% endif %}
             </div>
 
             <div class="alert-box">
-                <p style="margin: 0;"><strong>⚠️ IMPORTANT - You are still accountable:</strong></p>
+                <p style="margin: 0;"><strong>⚠️ important - you are still accountable:</strong></p>
                 <ul style="margin: 10px 0;">
-                    <li>This item remains assigned to you</li>
-                    <li>You are responsible until it is found or written off</li>
-                    <li>If you find the item, please contact staff immediately</li>
-                    <li>Lost items must be reported to your department head</li>
+                    <li>this item remains assigned to you</li>
+                    <li>you are responsible until it is found or written off</li>
+                    <li>if you find the item, please contact staff immediately</li>
+                    <li>lost items must be reported to your department head</li>
                 </ul>
             </div>
 
-            <p style="background: #FEF3C7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <strong>Found the item?</strong> Contact your manager or the auditor immediately to initiate the recovery workflow.
+            <p style="background: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #F9DC5C;">
+                <strong>found the item?</strong> contact your manager or the auditor immediately to initiate the recovery workflow.
             </p>
 
-            <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-                <strong>Note:</strong> This is an automated notification from the audit system.
+            <p style="margin-top: 30px; font-size: 14px; color: #7A6652; background: white; padding: 15px; border-radius: 8px;">
+                <strong>note:</strong> this is an automated notification from the audit system.
             </p>
         </div>
         <div class="footer">
-            <p>&copy; 2025 Kurutracker - Asset Management System</p>
-            <p>This is an automated email. Please do not reply.</p>
+            <p>&copy; 2025 kuru tracker - asset management system</p>
+            <p>this is an automated email. please do not reply.</p>
         </div>
     </div>
 </body>

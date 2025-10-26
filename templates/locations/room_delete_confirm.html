@@ -1,143 +1,151 @@
 {% extends 'base.html' %}
 
-{% block title %}Deactivate Room - Kurutracker{% endblock %}
+{% block title %}deactivate room - KURU Tracker{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-2xl mx-auto">
-        <!-- Confirmation Card -->
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <div class="bg-gradient-to-r from-red-600 to-orange-600 px-6 py-4">
-                <h2 class="text-2xl font-bold text-white flex items-center">
-                    <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                    Confirm Deactivation
-                </h2>
-            </div>
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-kuru-danger px-8 py-12 text-center text-white">
+            <svg class="w-20 h-20 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <h1 class="text-3xl font-bold mb-2">deactivate room</h1>
+            <p class="text-white/90">remove room from item tracking</p>
+        </div>
 
-            <div class="p-8">
-                <div class="mb-6">
-                    <p class="text-lg text-gray-800 mb-4">
-                        Are you sure you want to delete room <strong class="font-bold text-red-600">{{ room.code }}</strong>?
-                    </p>
+        <div class="p-8">
+            <div class="mb-6">
+                <p class="text-lg text-kuru-brown mb-4">
+                    are you sure you want to delete room <strong class="font-bold text-kuru-danger">{{ room.code }}</strong>?
+                </p>
+                {% if room.description %}
+                <p class="text-sm text-gray-600 mb-4">{{ room.description }}</p>
+                {% endif %}
 
-                    {% if item_count > 0 %}
-                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-                        <div class="flex">
-                            <svg class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <div class="ml-3">
-                                <h3 class="text-sm font-semibold text-red-800">Cannot Delete</h3>
-                                <p class="mt-2 text-sm text-red-700">
-                                    This room currently has <strong>{{ item_count }} active item{{ item_count|pluralize }}</strong> assigned to it.
-                                    Please reassign these items to other rooms before deleting.
-                                </p>
-                            </div>
+                {% if item_count > 0 %}
+                <div class="bg-kuru-danger/10 border-l-4 border-kuru-danger p-4 rounded-xl">
+                    <div class="flex">
+                        <svg class="h-6 w-6 text-kuru-danger flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-bold text-kuru-danger">cannot delete</h3>
+                            <p class="mt-2 text-sm text-gray-700">
+                                this room currently has <strong>{{ item_count }} active item{{ item_count|pluralize }}</strong> assigned to it.
+                                please reassign these items to other rooms before deleting.
+                            </p>
                         </div>
                     </div>
-                    {% else %}
-
-                    <!-- Delete Type Selection -->
-                    <form method="POST" class="space-y-6" id="deleteForm">
-                        {% csrf_token %}
-
-                        <div class="space-y-3">
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">Delete Type:</label>
-
-                            <!-- Soft Delete Option (Default) -->
-                            <div class="relative">
-                                <input type="radio" id="soft_delete" name="delete_type" value="soft" checked
-                                       class="peer hidden">
-                                <label for="soft_delete" class="flex items-start p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all">
-                                    <div class="flex items-center h-5">
-                                        <svg class="w-5 h-5 text-blue-600 hidden peer-checked:block absolute left-6 top-6" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                        </svg>
-                                        <div class="w-5 h-5 border-2 rounded-full peer-checked:border-blue-600 peer-checked:bg-blue-100"></div>
-                                    </div>
-                                    <div class="ml-3 flex-1">
-                                        <p class="font-semibold text-gray-900">Soft Delete (Recommended)</p>
-                                        <p class="text-sm text-gray-600 mt-1">Deactivate room. It will be hidden from selection but can be reactivated later.</p>
-                                        <div class="mt-2 flex items-center text-sm text-green-600">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                            Can be reactivated
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <!-- Hard Delete Option (Manager Only) -->
-                            <div class="relative">
-                                <input type="radio" id="hard_delete" name="delete_type" value="hard"
-                                       class="peer hidden" onchange="toggleDeleteButton()">
-                                <label for="hard_delete" class="flex items-start p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-red-50 peer-checked:border-red-500 peer-checked:bg-red-50 transition-all">
-                                    <div class="flex items-center h-5">
-                                        <svg class="w-5 h-5 text-red-600 hidden peer-checked:block absolute left-6 top-6" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                        </svg>
-                                        <div class="w-5 h-5 border-2 rounded-full peer-checked:border-red-600 peer-checked:bg-red-100"></div>
-                                    </div>
-                                    <div class="ml-3 flex-1">
-                                        <p class="font-semibold text-gray-900">Permanent Delete <span class="text-red-600 text-xs">(MANAGER ONLY)</span></p>
-                                        <p class="text-sm text-gray-600 mt-1">Permanently remove from database. This action CANNOT be undone!</p>
-                                        <div class="mt-2 flex items-center text-sm text-red-600">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                            </svg>
-                                            Cannot be restored
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-                            <button type="button"
-                                    onclick="history.back()"
-                                    class="px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-300 transition-all duration-200 shadow-md">
-                                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                                </svg>
-                                Cancel
-                            </button>
-
-                            <button type="submit" id="submitBtn"
-                                    class="px-8 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-semibold rounded-xl hover:from-orange-700 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl">
-                                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-                                </svg>
-                                <span id="btnText">Yes, Deactivate Room</span>
-                            </button>
-                        </div>
-                    </form>
-
-                    <script>
-                        function toggleDeleteButton() {
-                            const hardDelete = document.getElementById('hard_delete').checked;
-                            const submitBtn = document.getElementById('submitBtn');
-                            const btnText = document.getElementById('btnText');
-
-                            if (hardDelete) {
-                                submitBtn.className = 'px-8 py-3 bg-gradient-to-r from-red-700 to-pink-700 text-white font-semibold rounded-xl hover:from-red-800 hover:to-pink-800 transition-all duration-200 shadow-lg hover:shadow-xl';
-                                btnText.textContent = 'Yes, PERMANENTLY DELETE';
-                            } else {
-                                submitBtn.className = 'px-8 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-semibold rounded-xl hover:from-orange-700 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl';
-                                btnText.textContent = 'Yes, Deactivate Room';
-                            }
-                        }
-
-                        // Add radio button change listeners
-                        document.getElementById('soft_delete').addEventListener('change', toggleDeleteButton);
-                        document.getElementById('hard_delete').addEventListener('change', toggleDeleteButton);
-                    </script>
-
-                    {% endif %}
                 </div>
+
+                <div class="flex items-center justify-between pt-6 border-t-2 border-gray-100">
+                    <a href="{% url 'locations:room_list' %}"
+                       class="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-all duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        back to rooms
+                    </a>
+                </div>
+                {% else %}
+
+                <!-- Delete Type Selection -->
+                <form method="POST" class="space-y-6" id="deleteForm">
+                    {% csrf_token %}
+
+                    <div class="space-y-3">
+                        <label class="block text-sm font-bold text-kuru-brown mb-3">delete type:</label>
+
+                        <!-- Soft Delete Option (Default) -->
+                        <div class="relative">
+                            <input type="radio" id="soft_delete" name="delete_type" value="soft" checked
+                                   class="peer hidden">
+                            <label for="soft_delete" class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-kuru-orange peer-checked:bg-kuru-orange/5 transition-all">
+                                <div class="flex items-center h-5">
+                                    <svg class="w-5 h-5 text-kuru-orange hidden peer-checked:block absolute left-6 top-6" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <div class="w-5 h-5 border-2 rounded-full peer-checked:border-kuru-orange peer-checked:bg-kuru-orange/10"></div>
+                                </div>
+                                <div class="ml-3 flex-1">
+                                    <p class="font-bold text-kuru-brown">soft delete (recommended)</p>
+                                    <p class="text-sm text-gray-600 mt-1">deactivate room. it will be hidden from selection but can be reactivated later.</p>
+                                    <div class="mt-2 flex items-center text-sm text-kuru-success">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        can be reactivated
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Hard Delete Option (Manager Only) -->
+                        <div class="relative">
+                            <input type="radio" id="hard_delete" name="delete_type" value="hard"
+                                   class="peer hidden" onchange="toggleDeleteButton()">
+                            <label for="hard_delete" class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-kuru-danger/5 peer-checked:border-kuru-danger peer-checked:bg-kuru-danger/5 transition-all">
+                                <div class="flex items-center h-5">
+                                    <svg class="w-5 h-5 text-kuru-danger hidden peer-checked:block absolute left-6 top-6" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <div class="w-5 h-5 border-2 rounded-full peer-checked:border-kuru-danger peer-checked:bg-kuru-danger/10"></div>
+                                </div>
+                                <div class="ml-3 flex-1">
+                                    <p class="font-bold text-kuru-brown">permanent delete <span class="text-kuru-danger text-xs font-bold">(manager only)</span></p>
+                                    <p class="text-sm text-gray-600 mt-1">permanently remove from database. this action cannot be undone!</p>
+                                    <div class="mt-2 flex items-center text-sm text-kuru-danger">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        </svg>
+                                        cannot be restored
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center justify-between pt-6 border-t-2 border-gray-100">
+                        <a href="{% url 'locations:room_list' %}"
+                           class="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-all duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                            </svg>
+                            cancel
+                        </a>
+
+                        <button type="submit" id="submitBtn"
+                                class="inline-flex items-center px-8 py-3 bg-kuru-orange text-white font-bold rounded-lg hover:bg-kuru-orange/90 transition-all duration-200 shadow-md hover:shadow-lg">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 715.636 5.636m12.728 12.728L5.636 5.636"/>
+                            </svg>
+                            <span id="btnText">yes, deactivate room</span>
+                        </button>
+                    </div>
+                </form>
+
+                <script>
+                    function toggleDeleteButton() {
+                        const hardDelete = document.getElementById('hard_delete').checked;
+                        const submitBtn = document.getElementById('submitBtn');
+                        const btnText = document.getElementById('btnText');
+
+                        if (hardDelete) {
+                            submitBtn.className = 'inline-flex items-center px-8 py-3 bg-kuru-danger text-white font-bold rounded-lg hover:bg-kuru-danger/90 transition-all duration-200 shadow-md hover:shadow-lg';
+                            btnText.textContent = 'yes, permanently delete';
+                        } else {
+                            submitBtn.className = 'inline-flex items-center px-8 py-3 bg-kuru-orange text-white font-bold rounded-lg hover:bg-kuru-orange/90 transition-all duration-200 shadow-md hover:shadow-lg';
+                            btnText.textContent = 'yes, deactivate room';
+                        }
+                    }
+
+                    // Add radio button change listeners
+                    document.getElementById('soft_delete').addEventListener('change', toggleDeleteButton);
+                    document.getElementById('hard_delete').addEventListener('change', toggleDeleteButton);
+                </script>
+
+                {% endif %}
             </div>
         </div>
     </div>

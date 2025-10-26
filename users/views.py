@@ -125,7 +125,12 @@ def user_edit(request, pk):
     # Prevent editing yourself
     if user == request.user:
         messages.error(request, "You cannot edit your own account. Please ask another manager.")
-        return redirect('users:user_detail', pk=pk)
+        return redirect('users:user_list')
+
+    # Prevent editing other managers unless you're a superuser
+    if user.role == 'MANAGER' and not request.user.is_superuser:
+        messages.error(request, "Only superusers can edit manager accounts.")
+        return redirect('users:user_list')
 
     if request.method == 'POST':
         form = UserEditForm(request.POST, instance=user, request_user=request.user)
@@ -143,7 +148,7 @@ def user_edit(request, pk):
                 return redirect('users:user_edit', pk=pk)
             else:
                 messages.success(request, f"User {user.email} updated successfully.")
-                return redirect('users:user_detail', pk=pk)
+                return redirect('users:user_edit', pk=pk)
     else:
         form = UserEditForm(instance=user, request_user=request.user)
 
@@ -173,7 +178,7 @@ def user_deactivate(request, pk):
     # Prevent deactivating yourself
     if user == request.user:
         messages.error(request, "You cannot deactivate your own account.")
-        return redirect('users:user_detail', pk=pk)
+        return redirect('users:user_edit', pk=pk)
 
     # Check if user has items
     item_count = user.get_item_count()
@@ -185,7 +190,7 @@ def user_deactivate(request, pk):
                 f"Cannot deactivate {user.email}. User still holds {item_count} items. "
                 f"Please use Forced Transfer or manually transfer all items first."
             )
-            return redirect('users:user_detail', pk=pk)
+            return redirect('users:user_edit', pk=pk)
 
         try:
             user.deactivate()
@@ -196,7 +201,7 @@ def user_deactivate(request, pk):
             return redirect('users:user_list')
         except ValidationError as e:
             messages.error(request, str(e))
-            return redirect('users:user_detail', pk=pk)
+            return redirect('users:user_edit', pk=pk)
 
     context = {
         'user_obj': user,
@@ -214,16 +219,16 @@ def user_forced_transfer(request, pk):
     """
     source_user = get_object_or_404(User, pk=pk)
 
-    # Get items held by user
-    items = Item.objects.filter(
+    # Get items held by user (initial count check)
+    items_preview = Item.objects.filter(
         current_owner=source_user,
         status__in=['NORMAL', 'DAMAGED', 'PENDING_INSPECTION']
     )
-    item_count = items.count()
+    item_count_preview = items_preview.count()
 
-    if item_count == 0:
+    if item_count_preview == 0:
         messages.info(request, f"{source_user.email} does not hold any items.")
-        return redirect('users:user_detail', pk=pk)
+        return redirect('users:user_edit', pk=pk)
 
     if request.method == 'POST':
         form = ForcedTransferForm(request.POST)
@@ -232,6 +237,14 @@ def user_forced_transfer(request, pk):
 
             try:
                 with transaction.atomic():
+                    # Lock items for update to prevent race conditions
+                    items = Item.objects.filter(
+                        current_owner=source_user,
+                        status__in=['NORMAL', 'DAMAGED', 'PENDING_INSPECTION']
+                    ).select_for_update()
+
+                    item_count = items.count()
+
                     # Transfer all items
                     for item in items:
                         old_owner = item.current_owner
@@ -253,7 +266,7 @@ def user_forced_transfer(request, pk):
                         f"Successfully transferred {item_count} items from {source_user.email} "
                         f"to {target_staff.email}. You can now deactivate the user if needed."
                     )
-                    return redirect('users:user_detail', pk=pk)
+                    return redirect('users:user_edit', pk=pk)
 
             except Exception as e:
                 messages.error(request, f"Error during forced transfer: {str(e)}")
@@ -263,8 +276,8 @@ def user_forced_transfer(request, pk):
 
     context = {
         'source_user': source_user,
-        'items': items,
-        'item_count': item_count,
+        'items': items_preview,
+        'item_count': item_count_preview,
         'form': form,
     }
 
@@ -283,7 +296,7 @@ def user_activate(request, pk):
             request,
             f"User {user.email} has been reactivated successfully."
         )
-        return redirect('users:user_detail', pk=pk)
+        return redirect('users:user_edit', pk=pk)
 
     context = {
         'user_obj': user,
@@ -304,7 +317,7 @@ def grant_auditor_permission(request, pk):
 
     if user.is_auditor:
         messages.info(request, f"{user.email} already has auditor permission.")
-        return redirect('users:user_detail', pk=pk)
+        return redirect('users:user_edit', pk=pk)
 
     if request.method == 'POST':
         user.is_auditor = True
@@ -313,7 +326,7 @@ def grant_auditor_permission(request, pk):
             request,
             f"Auditor permission granted to {user.email}. They can now access the audit checklist."
         )
-        return redirect('users:user_detail', pk=pk)
+        return redirect('users:user_edit', pk=pk)
 
     context = {
         'user_obj': user,
@@ -329,7 +342,7 @@ def revoke_auditor_permission(request, pk):
 
     if not user.is_auditor:
         messages.info(request, f"{user.email} does not have auditor permission.")
-        return redirect('users:user_detail', pk=pk)
+        return redirect('users:user_edit', pk=pk)
 
     if request.method == 'POST':
         user.is_auditor = False
@@ -338,7 +351,7 @@ def revoke_auditor_permission(request, pk):
             request,
             f"Auditor permission revoked from {user.email}."
         )
-        return redirect('users:user_detail', pk=pk)
+        return redirect('users:user_edit', pk=pk)
 
     context = {
         'user_obj': user,

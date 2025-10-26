@@ -1,15 +1,14 @@
 {% extends 'base.html' %}
 
-{% block title %}Audit Checklist - Kurutracker{% endblock %}
+{% block title %}audit checklist - KURU Tracker{% endblock %}
 
 {% block content %}
 <style>
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fadeIn {
-        animation: fadeIn 0.5s ease-out;
+    input[type="text"]:focus,
+    select:focus {
+        outline: none;
+        border-color: #F9DC5C;
+        box-shadow: 0 0 0 3px rgba(249, 220, 92, 0.1);
     }
     .status-select {
         min-width: 140px;
@@ -18,211 +17,209 @@
     }
 </style>
 
-<div class="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50 py-8 px-4">
-    <div class="max-w-7xl mx-auto space-y-6">
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-yellow-600 to-orange-600 rounded-2xl shadow-xl p-8 text-white animate-fadeIn">
-            <div class="flex items-center justify-between">
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-md p-8 border-l-4 border-kuru-yellow">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-3xl font-bold text-kuru-brown mb-1">audit checklist</h1>
+                <p class="text-gray-600">complete inventory inspection and item status verification</p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <a href="{% url 'audit:audit_report' %}" class="inline-flex items-center px-4 py-2 bg-kuru-blue text-white font-semibold rounded-lg hover:bg-kuru-blue/90 transition-all duration-200">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    view report
+                </a>
+                <a href="{% url 'audit:audit_lost_items' %}" class="inline-flex items-center px-4 py-2 bg-kuru-danger text-white font-semibold rounded-lg hover:bg-kuru-danger/90 transition-all duration-200">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    lost items
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border-t-4 border-kuru-blue">
+            <p class="text-gray-600 text-sm font-semibold mb-1">total items</p>
+            <p class="text-3xl font-bold text-kuru-brown">{{ total_items }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border-t-4 border-kuru-success">
+            <p class="text-gray-600 text-sm font-semibold mb-1">normal</p>
+            <p class="text-3xl font-bold text-kuru-brown">{{ normal_count }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border-t-4 border-kuru-yellow">
+            <p class="text-gray-600 text-sm font-semibold mb-1">damaged</p>
+            <p class="text-3xl font-bold text-kuru-brown">{{ damaged_count }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border-t-4 border-kuru-orange">
+            <p class="text-gray-600 text-sm font-semibold mb-1">repair</p>
+            <p class="text-3xl font-bold text-kuru-brown">{{ repair_count }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border-t-4 border-kuru-danger">
+            <p class="text-gray-600 text-sm font-semibold mb-1">lost</p>
+            <p class="text-3xl font-bold text-kuru-brown">{{ lost_count }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border-t-4 border-kuru-green">
+            <p class="text-gray-600 text-sm font-semibold mb-1">pending</p>
+            <p class="text-3xl font-bold text-kuru-brown">{{ pending_count }}</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <form method="get" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                <!-- Search -->
+                <div class="lg:col-span-2">
+                    <label class="block text-sm font-bold text-kuru-brown mb-2">search</label>
+                    <input type="text" name="search" value="{{ search_query|default:'' }}"
+                           placeholder="asset id, name, model, owner..."
+                           class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg">
+                </div>
+
+                <!-- Category -->
                 <div>
-                    <h1 class="text-4xl font-bold mb-2">Audit Checklist</h1>
-                    <p class="text-yellow-100 text-lg">Complete inventory inspection and item status verification</p>
-                </div>
-                <div class="flex space-x-3">
-                    <a href="{% url 'audit:audit_report' %}" class="px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
-                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        View Report
-                    </a>
-                    <a href="{% url 'audit:audit_lost_items' %}" class="px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
-                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                        Lost Items
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-4 animate-fadeIn">
-            <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500 transform hover:scale-105 transition-all">
-                <p class="text-sm text-gray-500 font-semibold">Total Items</p>
-                <p class="text-3xl font-bold text-gray-900">{{ total_items }}</p>
-            </div>
-            <div class="bg-green-50 rounded-xl shadow-lg p-6 border-l-4 border-green-500 transform hover:scale-105 transition-all">
-                <p class="text-sm text-green-700 font-semibold">Normal</p>
-                <p class="text-3xl font-bold text-green-900">{{ normal_count }}</p>
-            </div>
-            <div class="bg-yellow-50 rounded-xl shadow-lg p-6 border-l-4 border-yellow-500 transform hover:scale-105 transition-all">
-                <p class="text-sm text-yellow-700 font-semibold">Damaged</p>
-                <p class="text-3xl font-bold text-yellow-900">{{ damaged_count }}</p>
-            </div>
-            <div class="bg-orange-50 rounded-xl shadow-lg p-6 border-l-4 border-orange-500 transform hover:scale-105 transition-all">
-                <p class="text-sm text-orange-700 font-semibold">Repair</p>
-                <p class="text-3xl font-bold text-orange-900">{{ repair_count }}</p>
-            </div>
-            <div class="bg-red-50 rounded-xl shadow-lg p-6 border-l-4 border-red-500 transform hover:scale-105 transition-all">
-                <p class="text-sm text-red-700 font-semibold">Lost</p>
-                <p class="text-3xl font-bold text-red-900">{{ lost_count }}</p>
-            </div>
-            <div class="bg-blue-50 rounded-xl shadow-lg p-6 border-l-4 border-blue-400 transform hover:scale-105 transition-all">
-                <p class="text-sm text-blue-700 font-semibold">Pending</p>
-                <p class="text-3xl font-bold text-blue-900">{{ pending_count }}</p>
-            </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 animate-fadeIn">
-            <form method="get" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    <!-- Search -->
-                    <div class="lg:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Search</label>
-                        <input type="text" name="search" value="{{ search_query|default:'' }}"
-                               placeholder="Asset ID, name, model, owner..."
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
-                    </div>
-
-                    <!-- Category -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-                        <select name="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500">
-                            <option value="">All Categories</option>
-                            {% for cat in categories %}
-                            <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:"s" %}selected{% endif %}>
-                                {{ cat.name }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Room -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Room</label>
-                        <select name="room" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500">
-                            <option value="">All Rooms</option>
-                            {% for room in rooms %}
-                            <option value="{{ room.id }}" {% if room_filter == room.id|stringformat:"s" %}selected{% endif %}>
-                                {{ room.code }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Status -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-                        <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500">
-                            <option value="">All Statuses</option>
-                            {% for status_code, status_label in statuses %}
-                            <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>
-                                {{ status_label }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Owner -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Owner</label>
-                        <select name="owner" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500">
-                            <option value="">All Owners</option>
-                            {% for owner in owners %}
-                            <option value="{{ owner.id }}" {% if owner_filter == owner.id|stringformat:"s" %}selected{% endif %}>
-                                {{ owner.email }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-3">
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-lg font-semibold hover:from-yellow-700 hover:to-orange-700 transition-all shadow-md hover:shadow-lg">
-                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                        Apply Filters
-                    </button>
-                    <a href="{% url 'audit:audit_checklist' %}" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-all">
-                        Clear
-                    </a>
-                </div>
-            </form>
-        </div>
-
-        <!-- Items Table -->
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-fadeIn">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Asset ID</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Item Name</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Category</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Room</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Owner</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Location Info</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for item in items %}
-                        <tr class="hover:bg-yellow-50 transition-colors" data-item-id="{{ item.id }}">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                                <a href="{% url 'items:item_detail' item.pk %}" class="text-blue-600 hover:text-blue-800">
-                                    {{ item.asset_id }}
-                                </a>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ item.name }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ item.category.name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                {% if item.room %}
-                                    <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded font-medium">{{ item.room.code }}</span>
-                                {% else %}
-                                    <span class="text-gray-400">—</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ item.current_owner.email }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500">
-                                {% if item.location_description %}
-                                    {{ item.location_description|truncatewords:5 }}
-                                {% else %}
-                                    <span class="text-gray-400">—</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <select class="status-select border-2 rounded-lg font-semibold focus:ring-2 focus:ring-yellow-500 transition-all
-                                    {% if item.status == 'NORMAL' %}bg-green-50 text-green-800 border-green-300
-                                    {% elif item.status == 'DAMAGED' %}bg-yellow-50 text-yellow-800 border-yellow-300
-                                    {% elif item.status == 'REPAIR' %}bg-orange-50 text-orange-800 border-orange-300
-                                    {% elif item.status == 'LOST' %}bg-red-50 text-red-800 border-red-300
-                                    {% elif item.status == 'PENDING_INSPECTION' %}bg-blue-50 text-blue-800 border-blue-300
-                                    {% else %}bg-gray-50 text-gray-800 border-gray-300{% endif %}"
-                                    data-item-id="{{ item.id }}"
-                                    onchange="updateItemStatus(this, {{ item.id }})">
-                                    {% for status_code, status_label in statuses %}
-                                    <option value="{{ status_code }}" {% if item.status == status_code %}selected{% endif %}>
-                                        {{ status_label }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="7" class="px-6 py-16 text-center">
-                                <svg class="w-20 h-20 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                                </svg>
-                                <p class="text-xl font-semibold text-gray-600 mb-2">No items found</p>
-                                <p class="text-sm text-gray-500">Try adjusting your filters or search criteria</p>
-                            </td>
-                        </tr>
+                    <label class="block text-sm font-bold text-kuru-brown mb-2">category</label>
+                    <select name="category" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg">
+                        <option value="">all categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:"s" %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
                         {% endfor %}
-                    </tbody>
-                </table>
+                    </select>
+                </div>
+
+                <!-- Room -->
+                <div>
+                    <label class="block text-sm font-bold text-kuru-brown mb-2">room</label>
+                    <select name="room" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg">
+                        <option value="">all rooms</option>
+                        {% for room in rooms %}
+                        <option value="{{ room.id }}" {% if room_filter == room.id|stringformat:"s" %}selected{% endif %}>
+                            {{ room.code }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <label class="block text-sm font-bold text-kuru-brown mb-2">status</label>
+                    <select name="status" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg">
+                        <option value="">all statuses</option>
+                        {% for status_code, status_label in statuses %}
+                        <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>
+                            {{ status_label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Owner -->
+                <div>
+                    <label class="block text-sm font-bold text-kuru-brown mb-2">owner</label>
+                    <select name="owner" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg">
+                        <option value="">all owners</option>
+                        {% for owner in owners %}
+                        <option value="{{ owner.id }}" {% if owner_filter == owner.id|stringformat:"s" %}selected{% endif %}>
+                            {{ owner.email }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
+
+            <div class="flex items-center space-x-3">
+                <button type="submit" class="inline-flex items-center px-8 py-3 bg-kuru-yellow text-white rounded-lg font-bold hover:bg-kuru-yellow/90 transition-all shadow-md">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    apply filters
+                </button>
+                <a href="{% url 'audit:audit_checklist' %}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-all">
+                    clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Items Table -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-kuru-brown">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">asset id</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">item name</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">category</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">room</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">owner</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">location info</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">status</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for item in items %}
+                    <tr class="hover:bg-kuru-beige transition-colors" data-item-id="{{ item.id }}">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-kuru-brown">
+                            <a href="{% url 'items:item_detail' item.pk %}" class="text-kuru-blue hover:text-kuru-blue/80">
+                                {{ item.asset_id }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900">{{ item.name }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ item.category.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {% if item.room %}
+                                <span class="px-2 py-1 bg-kuru-green/20 text-kuru-green rounded font-semibold text-xs">{{ item.room.code }}</span>
+                            {% else %}
+                                <span class="text-gray-400">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ item.current_owner.email }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            {% if item.location_description %}
+                                {{ item.location_description|truncatewords:5 }}
+                            {% else %}
+                                <span class="text-gray-400">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <select class="status-select border-2 rounded-lg font-semibold focus:ring-2 focus:ring-kuru-yellow transition-all
+                                {% if item.status == 'NORMAL' %}bg-kuru-success/10 text-kuru-success border-kuru-success/30
+                                {% elif item.status == 'DAMAGED' %}bg-kuru-yellow/10 text-kuru-yellow border-kuru-yellow/30
+                                {% elif item.status == 'REPAIR' %}bg-kuru-orange/10 text-kuru-orange border-kuru-orange/30
+                                {% elif item.status == 'LOST' %}bg-kuru-danger/10 text-kuru-danger border-kuru-danger/30
+                                {% elif item.status == 'PENDING_INSPECTION' %}bg-kuru-blue/10 text-kuru-blue border-kuru-blue/30
+                                {% else %}bg-gray-50 text-gray-800 border-gray-300{% endif %}"
+                                data-item-id="{{ item.id }}"
+                                onchange="updateItemStatus(this, {{ item.id }})">
+                                {% for status_code, status_label in statuses %}
+                                <option value="{{ status_code }}" {% if item.status == status_code %}selected{% endif %}>
+                                    {{ status_label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-16 text-center">
+                            <svg class="w-20 h-20 mx-auto mb-4 text-kuru-brown/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                            </svg>
+                            <p class="text-xl font-bold text-kuru-brown mb-2">no items found</p>
+                            <p class="text-sm text-gray-500">try adjusting your filters or search criteria</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -249,9 +246,9 @@ function getCookie(name) {
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     const bgColors = {
-        success: 'bg-green-500',
-        error: 'bg-red-500',
-        info: 'bg-blue-500'
+        success: 'bg-kuru-success',
+        error: 'bg-kuru-danger',
+        info: 'bg-kuru-blue'
     };
 
     toast.className = `fixed bottom-8 right-8 px-6 py-4 rounded-lg shadow-2xl transition-all duration-300 z-50 text-white ${bgColors[type]} transform translate-y-0`;
@@ -289,18 +286,18 @@ function updateItemStatus(selectElement, itemId) {
     .then(data => {
         if (data.success) {
             // Update select styling based on new status
-            selectElement.className = 'status-select border-2 rounded-lg font-semibold focus:ring-2 focus:ring-yellow-500 transition-all';
+            selectElement.className = 'status-select border-2 rounded-lg font-semibold focus:ring-2 focus:ring-kuru-yellow transition-all';
 
             if (newStatus === 'NORMAL') {
-                selectElement.classList.add('bg-green-50', 'text-green-800', 'border-green-300');
+                selectElement.classList.add('bg-kuru-success/10', 'text-kuru-success', 'border-kuru-success/30');
             } else if (newStatus === 'DAMAGED') {
-                selectElement.classList.add('bg-yellow-50', 'text-yellow-800', 'border-yellow-300');
+                selectElement.classList.add('bg-kuru-yellow/10', 'text-kuru-yellow', 'border-kuru-yellow/30');
             } else if (newStatus === 'REPAIR') {
-                selectElement.classList.add('bg-orange-50', 'text-orange-800', 'border-orange-300');
+                selectElement.classList.add('bg-kuru-orange/10', 'text-kuru-orange', 'border-kuru-orange/30');
             } else if (newStatus === 'LOST') {
-                selectElement.classList.add('bg-red-50', 'text-red-800', 'border-red-300');
+                selectElement.classList.add('bg-kuru-danger/10', 'text-kuru-danger', 'border-kuru-danger/30');
             } else if (newStatus === 'PENDING_INSPECTION') {
-                selectElement.classList.add('bg-blue-50', 'text-blue-800', 'border-blue-300');
+                selectElement.classList.add('bg-kuru-blue/10', 'text-kuru-blue', 'border-kuru-blue/30');
             }
 
             showToast(data.message, 'success');

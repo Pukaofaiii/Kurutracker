@@ -148,13 +148,20 @@ def notify_request_rejected(transfer_request, reason):
     send_notification_email(recipient, subject, 'request_rejected.html', context)
 
 
-def notify_request_expiring_soon(transfer_request, days_remaining):
-    """Notify user that their pending request is expiring soon."""
+def notify_request_expiring_soon(transfer_request, hours_remaining):
+    """
+    Notify user that their pending request is expiring soon.
+
+    Args:
+        transfer_request: TransferRequest object
+        hours_remaining: Hours until expiration (48 or 24)
+    """
     recipient = transfer_request.to_user
 
-    title = "Request Expiring Soon"
-    message = f"You have a pending request for {transfer_request.item.asset_id} that will expire in {days_remaining} days."
+    title = f"Request Expiring in {hours_remaining} Hours"
+    message = f"You have a pending request for {transfer_request.item.asset_id} that will expire in {hours_remaining} hours."
 
+    # Always create in-app notification
     create_notification(
         recipient=recipient,
         notification_type=Notification.NotificationType.REQUEST_EXPIRING_SOON,
@@ -163,23 +170,30 @@ def notify_request_expiring_soon(transfer_request, days_remaining):
         related_request=transfer_request
     )
 
-    # Send email
-    subject = f"[Kurutracker] {title} - Action Required"
-    context = {
-        'recipient': recipient,
-        'transfer_request': transfer_request,
-        'days_remaining': days_remaining,
-    }
-    send_notification_email(recipient, subject, 'request_expiring_soon.html', context)
+    # Only send email if user hasn't opted out
+    if not recipient.disable_expiration_emails:
+        subject = f"[Kurutracker] {title} - Action Required"
+        context = {
+            'recipient': recipient,
+            'transfer_request': transfer_request,
+            'hours_remaining': hours_remaining,
+        }
+        send_notification_email(recipient, subject, 'request_expiring_soon.html', context)
 
 
 def notify_request_expired(transfer_request):
-    """Notify users that a request has expired and been auto-cancelled."""
+    """
+    Notify users that a request has expired.
+
+    Always creates in-app notifications for both sender and recipient.
+    Sends email only if user hasn't opted out of expiration emails.
+    """
     # Notify both sender and recipient
     for user in [transfer_request.from_user, transfer_request.to_user]:
         title = "Request Expired"
-        message = f"Transfer request for {transfer_request.item.asset_id} has expired and been automatically cancelled."
+        message = f"Transfer request for {transfer_request.item.asset_id} has expired."
 
+        # Always create in-app notification
         create_notification(
             recipient=user,
             notification_type=Notification.NotificationType.REQUEST_EXPIRED,
@@ -188,13 +202,14 @@ def notify_request_expired(transfer_request):
             related_request=transfer_request
         )
 
-        # Send email
-        subject = f"[Kurutracker] {title}"
-        context = {
-            'recipient': user,
-            'transfer_request': transfer_request,
-        }
-        send_notification_email(user, subject, 'request_expired.html', context)
+        # Only send email if user hasn't opted out
+        if not user.disable_expiration_emails:
+            subject = f"[Kurutracker] {title}"
+            context = {
+                'recipient': user,
+                'transfer_request': transfer_request,
+            }
+            send_notification_email(user, subject, 'request_expired.html', context)
 
 
 def get_unread_count(user):

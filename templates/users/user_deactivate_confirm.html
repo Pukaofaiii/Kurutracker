@@ -1,44 +1,47 @@
 {% extends 'base.html' %}
 
-{% block title %}Deactivate User - Kurutracker{% endblock %}
+{% block title %}deactivate user - KURU Tracker{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
-        <div class="bg-gradient-to-r from-red-600 to-pink-600 px-8 py-12 text-center text-white">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-kuru-danger px-8 py-12 text-center text-white">
             <svg class="w-20 h-20 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
-            <h1 class="text-3xl font-bold mb-2">Deactivate User</h1>
-            <p class="text-red-100">This action will disable the user account</p>
+            <h1 class="text-3xl font-bold mb-2">deactivate user</h1>
+            <p class="text-white/90">this action will disable the user account</p>
         </div>
 
         <div class="p-8">
             <div class="mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">User Information</h2>
-                <div class="bg-gray-50 rounded-lg p-6">
-                    <p class="text-lg font-bold text-gray-900">{{ user_obj.get_full_name }}</p>
+                <h2 class="text-xl font-bold text-kuru-brown mb-4">user information</h2>
+                <div class="bg-kuru-beige rounded-xl p-6">
+                    <p class="text-lg font-bold text-kuru-brown">{{ user_obj.get_full_name }}</p>
                     <p class="text-gray-600">{{ user_obj.email }}</p>
-                    <p class="mt-2"><span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-bold">{{ user_obj.get_role_display }}</span></p>
+                    <p class="mt-2"><span class="px-3 py-1 rounded text-sm font-semibold
+                        {% if user_obj.is_manager %}bg-kuru-orange/20 text-kuru-orange
+                        {% elif user_obj.is_staff_member %}bg-kuru-blue/20 text-kuru-blue
+                        {% else %}bg-kuru-green/20 text-kuru-green{% endif %}">{{ user_obj.get_role_display }}</span></p>
                 </div>
             </div>
 
             {% if user_obj.has_items %}
-            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
+            <div class="bg-kuru-danger/10 border-l-4 border-kuru-danger p-4 rounded-xl mb-6">
                 <div class="flex">
-                    <svg class="w-6 h-6 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-6 h-6 text-kuru-danger mr-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                     </svg>
                     <div>
-                        <p class="font-bold text-red-800">Warning</p>
-                        <p class="text-sm text-red-700 mb-3">This user currently holds {{ user_obj.get_item_count }} item(s). Transfer all items before deactivating.</p>
+                        <p class="font-bold text-kuru-danger">warning</p>
+                        <p class="text-sm text-kuru-brown mb-3">this user currently holds {{ user_obj.get_item_count }} item(s). transfer all items before deactivating.</p>
                         {% if user.is_manager %}
                         <a href="{% url 'users:user_forced_transfer' user_obj.pk %}"
-                           class="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all duration-200 font-semibold text-sm">
+                           class="inline-flex items-center px-4 py-2 bg-kuru-orange text-white rounded-lg hover:bg-kuru-orange/90 transition-all duration-200 font-semibold text-sm shadow-md">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
-                            Use Forced Transfer
+                            use forced transfer
                         </a>
                         {% endif %}
                     </div>
@@ -50,10 +53,10 @@
                 {% csrf_token %}
                 <div class="flex items-center justify-between">
                     <button type="button" onclick="history.back()" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-all">
-                        Cancel
+                        cancel
                     </button>
-                    <button type="submit" {% if user_obj.has_items %}disabled{% endif %} class="px-8 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-lg font-bold hover:from-red-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl {% if user_obj.has_items %}opacity-50 cursor-not-allowed{% endif %}">
-                        Deactivate User
+                    <button type="submit" {% if user_obj.has_items %}disabled{% endif %} class="px-8 py-3 bg-kuru-danger text-white rounded-lg font-bold hover:bg-kuru-danger/90 transition-all shadow-md hover:shadow-lg {% if user_obj.has_items %}opacity-50 cursor-not-allowed{% endif %}">
+                        deactivate user
                     </button>
                 </div>
             </form>

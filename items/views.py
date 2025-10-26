@@ -43,6 +43,10 @@ def item_list(request):
     if request.user.is_teacher:
         items = items.filter(current_owner=request.user)
 
+    # Hide removed items if filter is checked
+    if request.GET.get('hide_removed'):
+        items = items.exclude(status='REMOVED')
+
     # Get all categories for the filter dropdown
     categories = ItemCategory.objects.all()
 
@@ -66,7 +70,7 @@ def item_create(request):
                 request,
                 f"Item {item.asset_id} - {item.name} created successfully."
             )
-            return redirect('items:item_detail', pk=item.pk)
+            return redirect('items:item_list')
     else:
         # Set default current_owner to request.user
         form = ItemForm(initial={'current_owner': request.user})
@@ -117,13 +121,17 @@ def item_update(request, pk):
                 request,
                 f"Item {item.asset_id} - {item.name} updated successfully."
             )
-            return redirect('items:item_detail', pk=item.pk)
+            return redirect('items:item_update', pk=item.pk)
     else:
         form = ItemForm(instance=item)
+
+    # Get transfer history
+    transfer_history = item.get_transfer_history()
 
     context = {
         'form': form,
         'item': item,
+        'transfer_history': transfer_history,
         'action': 'Update',
     }
 
@@ -148,7 +156,7 @@ def item_delete(request, pk):
                     request,
                     "Only managers can permanently delete items."
                 )
-                return redirect('items:item_detail', pk=pk)
+                return redirect('items:item_update', pk=pk)
 
             # Get transfer history count before deleting
             transfer_count = item.transfer_logs.count()
@@ -192,7 +200,7 @@ def update_item_location(request, pk):
     # Verify user owns the item or is staff
     if not request.user.is_staff_or_admin and item.current_owner != request.user:
         messages.error(request, "You can only update locations for items you own.")
-        return redirect('items:item_detail', pk=pk)
+        return redirect('items:item_update', pk=pk)
 
     if request.method == 'POST':
         form = UpdateLocationForm(request.POST)
@@ -203,7 +211,7 @@ def update_item_location(request, pk):
                 request,
                 f"Location updated for {item.asset_id} - {item.name}."
             )
-            return redirect('items:item_detail', pk=pk)
+            return redirect('items:item_update', pk=pk)
     else:
         # Pre-populate with current location if exists
         initial_data = {}
@@ -252,3 +260,278 @@ def category_create(request):
     }
 
     return render(request, 'items/category_form.html', context)
+
+
+@staff_required
+def bulk_delete_items(request):
+    """Soft delete (mark as REMOVED) multiple items at once (Staff/Admin only)."""
+    if request.method == 'POST':
+        item_ids = request.POST.getlist('item_ids')
+
+        if not item_ids:
+            messages.error(request, "No items selected for deletion.")
+            return redirect('items:item_list')
+
+        # Check if this is the confirmation step
+        if 'confirm' in request.POST:
+            from django.db import transaction
+            from django.utils import timezone
+
+            with transaction.atomic():
+                # Lock rows for update to prevent race conditions
+                items = Item.objects.filter(pk__in=item_ids).select_for_update()
+                count = items.count()
+
+                # Soft delete: Mark all as REMOVED
+                items.update(status='REMOVED', updated_at=timezone.now())
+
+            messages.success(
+                request,
+                f"{count} item(s) have been marked as REMOVED and removed from active circulation."
+            )
+            return redirect('items:item_list')
+
+        # Show confirmation page
+        items = Item.objects.filter(pk__in=item_ids)
+
+        context = {
+            'items': items,
+            'item_ids': item_ids,
+        }
+
+        return render(request, 'items/bulk_delete_confirm.html', context)
+
+    return redirect('items:item_list')
+
+
+@staff_required
+def bulk_update_status(request):
+    """Change status for multiple items at once (Staff/Admin only)."""
+    if request.method == 'POST':
+        item_ids = request.POST.getlist('item_ids')
+
+        if not item_ids:
+            messages.error(request, "No items selected for status change.")
+            return redirect('items:item_list')
+
+        # Check if this is the confirmation step with new status
+        if 'new_status' in request.POST:
+            from django.db import transaction
+            from django.utils import timezone
+
+            new_status = request.POST.get('new_status')
+
+            # Validate status
+            valid_statuses = [choice[0] for choice in Item.Status.choices]
+            if new_status not in valid_statuses:
+                messages.error(request, f"Invalid status selected: {new_status}")
+                return redirect('items:item_list')
+
+            with transaction.atomic():
+                # Lock rows for update to prevent race conditions
+                items = Item.objects.filter(pk__in=item_ids).select_for_update()
+                count = items.count()
+
+                # Update status for all selected items
+                items.update(status=new_status, updated_at=timezone.now())
+
+            status_display = dict(Item.Status.choices).get(new_status, new_status)
+            messages.success(
+                request,
+                f"{count} item(s) status changed to '{status_display}'."
+            )
+            return redirect('items:item_list')
+
+        # Show status selection form
+        items = Item.objects.filter(pk__in=item_ids)
+
+        context = {
+            'items': items,
+            'item_ids': item_ids,
+            'status_choices': Item.Status.choices,
+        }
+
+        return render(request, 'items/bulk_status_form.html', context)
+
+    return redirect('items:item_list')
+
+
+@staff_required
+def bulk_transfer_items(request):
+    """Transfer multiple items to a new owner at once (Staff/Admin only)."""
+    from users.models import User
+    from transfers.models import TransferLog
+
+    if request.method == 'POST':
+        item_ids = request.POST.getlist('item_ids')
+
+        if not item_ids:
+            messages.error(request, "No items selected for transfer.")
+            return redirect('items:item_list')
+
+        # Check if this is the confirmation step with new owner
+        if 'new_owner' in request.POST:
+            from django.db import transaction
+
+            new_owner_id = request.POST.get('new_owner')
+            notes = request.POST.get('notes', '')
+
+            # Validate user exists and is active
+            try:
+                new_owner = User.objects.get(
+                    pk=new_owner_id,
+                    is_active=True,
+                    role__in=['STAFF', 'MANAGER', 'TEACHER']
+                )
+            except User.DoesNotExist:
+                messages.error(request, "Selected user does not exist or is not active.")
+                return redirect('items:item_list')
+
+            with transaction.atomic():
+                # Lock items for update to prevent race conditions
+                items = Item.objects.filter(pk__in=item_ids).select_for_update()
+                count = 0
+
+                # Transfer each item and create transfer log
+                for item in items:
+                    old_owner = item.current_owner
+                    item.current_owner = new_owner
+                    item.save()
+
+                    # Create transfer log
+                    TransferLog.objects.create(
+                        item=item,
+                        from_user=old_owner,
+                        to_user=new_owner,
+                        is_forced=True,
+                        notes=notes or f"Bulk transfer by {request.user.email}"
+                    )
+                    count += 1
+
+            messages.success(
+                request,
+                f"{count} item(s) transferred to {new_owner.email}."
+            )
+            return redirect('items:item_list')
+
+        # Show owner selection form
+        items = Item.objects.filter(pk__in=item_ids)
+        users = User.objects.filter(is_active=True).order_by('email')
+
+        context = {
+            'items': items,
+            'item_ids': item_ids,
+            'users': users,
+        }
+
+        return render(request, 'items/bulk_transfer_form.html', context)
+
+    return redirect('items:item_list')
+
+
+@staff_required
+def removed_items_list(request):
+    """List all removed items (Staff/Admin only)."""
+    items = Item.objects.filter(status='REMOVED').select_related('category', 'current_owner')
+
+    context = {
+        'items': items,
+    }
+
+    return render(request, 'items/removed_items_list.html', context)
+
+
+@staff_required
+def restore_item(request, pk):
+    """Restore a removed item back to active status (Staff/Admin only)."""
+    item = get_object_or_404(Item, pk=pk)
+
+    if request.method == 'POST':
+        new_status = request.POST.get('new_status')
+
+        if not new_status:
+            messages.error(request, "Please select a status to restore the item to.")
+            return redirect('items:restore_item', pk=pk)
+
+        # Update item status
+        old_status = item.get_status_display()
+        item.status = new_status
+        item.save()
+
+        messages.success(
+            request,
+            f"Item {item.asset_id} - {item.name} has been restored from REMOVED to {item.get_status_display()}."
+        )
+        return redirect('items:removed_items_list')
+
+    # GET: Show confirmation page
+    # Available status choices (excluding REMOVED)
+    status_choices = [
+        (value, label) for value, label in Item.Status.choices
+        if value != 'REMOVED'
+    ]
+
+    context = {
+        'item': item,
+        'status_choices': status_choices,
+    }
+
+    return render(request, 'items/item_restore_confirm.html', context)
+
+
+@staff_required
+def bulk_restore_items(request):
+    """Restore multiple removed items at once (Staff/Admin only)."""
+    if request.method == 'POST':
+        item_ids = request.POST.getlist('item_ids')
+
+        if not item_ids:
+            messages.error(request, "No items selected for restore.")
+            return redirect('items:removed_items_list')
+
+        # Check if this is the confirmation step with new status
+        if 'new_status' in request.POST:
+            from django.db import transaction
+            from django.utils import timezone
+
+            new_status = request.POST.get('new_status')
+
+            # Validate status (should not be REMOVED)
+            valid_statuses = [choice[0] for choice in Item.Status.choices if choice[0] != 'REMOVED']
+            if new_status not in valid_statuses:
+                messages.error(request, f"Invalid status selected for restore: {new_status}")
+                return redirect('items:removed_items_list')
+
+            with transaction.atomic():
+                # Lock rows for update to prevent race conditions
+                items = Item.objects.filter(pk__in=item_ids, status='REMOVED').select_for_update()
+                count = items.count()
+
+                # Update status for all selected items
+                items.update(status=new_status, updated_at=timezone.now())
+
+            status_display = dict(Item.Status.choices).get(new_status, new_status)
+            messages.success(
+                request,
+                f"{count} item(s) restored to '{status_display}' status."
+            )
+            return redirect('items:removed_items_list')
+
+        # Show status selection form
+        items = Item.objects.filter(pk__in=item_ids)
+
+        # Available status choices (excluding REMOVED)
+        status_choices = [
+            (value, label) for value, label in Item.Status.choices
+            if value != 'REMOVED'
+        ]
+
+        context = {
+            'items': items,
+            'item_ids': item_ids,
+            'status_choices': status_choices,
+        }
+
+        return render(request, 'items/bulk_restore_form.html', context)
+
+    return redirect('items:removed_items_list')

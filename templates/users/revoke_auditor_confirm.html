@@ -1,40 +1,43 @@
 {% extends 'base.html' %}
 
-{% block title %}Revoke Auditor Permission - Kurutracker{% endblock %}
+{% block title %}revoke auditor permission - KURU Tracker{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
-        <div class="bg-gradient-to-r from-orange-600 to-red-600 px-8 py-12 text-center text-white">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-kuru-yellow px-8 py-12 text-center text-white">
             <svg class="w-20 h-20 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <h1 class="text-3xl font-bold mb-2">Revoke Auditor Permission</h1>
-            <p class="text-orange-100">Remove audit access from this user</p>
+            <h1 class="text-3xl font-bold mb-2">revoke auditor permission</h1>
+            <p class="text-white/90">remove audit access from this user</p>
         </div>
 
         <div class="p-8">
             <div class="mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">User Information</h2>
-                <div class="bg-gray-50 rounded-lg p-6">
-                    <p class="text-lg font-bold text-gray-900">{{ user_obj.get_full_name }}</p>
+                <h2 class="text-xl font-bold text-kuru-brown mb-4">user information</h2>
+                <div class="bg-kuru-beige rounded-xl p-6">
+                    <p class="text-lg font-bold text-kuru-brown">{{ user_obj.get_full_name }}</p>
                     <p class="text-gray-600">{{ user_obj.email }}</p>
-                    <p class="mt-2"><span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-bold">{{ user_obj.get_role_display }}</span></p>
+                    <p class="mt-2"><span class="px-3 py-1 rounded text-sm font-semibold
+                        {% if user_obj.is_manager %}bg-kuru-orange/20 text-kuru-orange
+                        {% elif user_obj.is_staff_member %}bg-kuru-blue/20 text-kuru-blue
+                        {% else %}bg-kuru-green/20 text-kuru-green{% endif %}">{{ user_obj.get_role_display }}</span></p>
                 </div>
             </div>
 
-            <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded mb-6">
+            <div class="bg-kuru-yellow/10 border-l-4 border-kuru-yellow p-4 rounded-xl mb-6">
                 <div class="flex">
-                    <svg class="w-6 h-6 text-orange-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-6 h-6 text-kuru-yellow mr-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                     </svg>
                     <div>
-                        <p class="font-bold text-orange-800">This will remove access to:</p>
-                        <ul class="text-sm text-orange-700 mt-2 space-y-1">
-                            <li>• Audit checklist of all items</li>
-                            <li>• Ability to mark items as damaged</li>
-                            <li>• Ability to mark items as lost</li>
-                            <li>• Lost items recovery workflow</li>
+                        <p class="font-bold text-kuru-brown">this will remove access to:</p>
+                        <ul class="text-sm text-gray-700 mt-2 space-y-1">
+                            <li>• audit checklist of all items</li>
+                            <li>• ability to mark items as damaged</li>
+                            <li>• ability to mark items as lost</li>
+                            <li>• lost items recovery workflow</li>
                         </ul>
                     </div>
                 </div>
@@ -44,10 +47,10 @@
                 {% csrf_token %}
                 <div class="flex items-center justify-between">
                     <button type="button" onclick="history.back()" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-all">
-                        Cancel
+                        cancel
                     </button>
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg font-bold hover:from-orange-700 hover:to-red-700 transition-all shadow-lg hover:shadow-xl">
-                        Revoke Auditor Permission
+                    <button type="submit" class="px-8 py-3 bg-kuru-yellow text-white rounded-lg font-bold hover:bg-kuru-yellow/90 transition-all shadow-md hover:shadow-lg">
+                        revoke auditor permission
                     </button>
                 </div>
             </form>
