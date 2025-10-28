@@ -6,8 +6,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from core.views import health_check
 
 urlpatterns = [
+    # Health check endpoint (for Docker)
+    path('health/', health_check, name='health_check'),
+
     # Django Admin Panel (for advanced management by MANAGER users)
     path('admin/', admin.site.urls),
 

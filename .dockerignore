@@ -1,49 +1,117 @@
+# ==============================================
+# .dockerignore for Kurutracker Django Project
+# ==============================================
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-venv/
-env/
-ENV/
+*.egg
 *.egg-info/
 .eggs/
 dist/
 build/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
 
 # Django
 *.log
 db.sqlite3
 db.sqlite3-journal
-/media
-/staticfiles
+/staticfiles/
+/media/
 
-# Environment
-.env
+# Environment files (keep .env for docker-compose)
+# .env will be used by docker-compose
 .env.local
+.env.*.local
 
-# IDE
+# IDEs
 .vscode/
 .idea/
 *.swp
+*.swo
+*~
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Git
-.git/
-.gitignore
-
-# Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
-
-# Node
-node_modules/
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.cover
+.hypothesis/
 
 # Documentation
+docs/_build/
+site/
 README.md
 *.md
+
+# Docker files (already in repo)
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Node modules (if Tailwind CSS uses them)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Project-specific
+sequence_*.txt
+database_diagram.dbml
+SYSTEM_DOCUMENTATION*.md
+TESTING_EXPIRATION.md
+EMAIL_SETUP.md
+RECENT_UPDATES.md
+
+# Coverage reports
+.coverage
+coverage.xml
+*.cover
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version

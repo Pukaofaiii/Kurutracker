@@ -47,12 +47,13 @@ def mark_as_read(request, pk):
 
 
 @login_required
-@require_POST
 def mark_all_as_read(request):
     """Mark all notifications as read for current user."""
-    Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+    # Only mark as read on POST requests (for security)
+    if request.method == 'POST':
+        Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
 
-    # Redirect back to referrer or notification list
+    # Redirect back to referrer or notification list (works for both GET and POST)
     return redirect(request.META.get('HTTP_REFERER', 'notifications:list'))
 
 

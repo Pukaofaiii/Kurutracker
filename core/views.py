@@ -187,3 +187,30 @@ def edit_profile(request):
     }
 
     return render(request, 'core/edit_profile.html', context)
+
+
+def health_check(request):
+    """
+    Health check endpoint for Docker container monitoring.
+    Returns 200 OK if the application is running and database is accessible.
+    """
+    from django.http import JsonResponse
+    from django.db import connection
+    import sys
+
+    status = {
+        'status': 'ok',
+        'python_version': sys.version,
+    }
+
+    # Check database connection
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        status['database'] = 'ok'
+    except Exception as e:
+        status['status'] = 'error'
+        status['database'] = f'error: {str(e)}'
+        return JsonResponse(status, status=503)
+
+    return JsonResponse(status, status=200)
