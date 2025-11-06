@@ -19,7 +19,7 @@ def role_required(allowed_roles):
             ...
 
     Args:
-        allowed_roles: List of role strings (e.g., ['TEACHER', 'STAFF', 'MANAGER'])
+        allowed_roles: List of role strings (e.g., ['MEMBER', 'STAFF', 'MANAGER'])
     """
     def decorator(view_func):
         @wraps(view_func)
@@ -47,9 +47,9 @@ def manager_required(view_func):
     return role_required(['MANAGER'])(view_func)
 
 
-def teacher_or_staff_required(view_func):
-    """Shortcut decorator for Teacher/Staff/Manager views."""
-    return role_required(['TEACHER', 'STAFF', 'MANAGER'])(view_func)
+def member_or_staff_required(view_func):
+    """Shortcut decorator for Member/Staff/Manager views."""
+    return role_required(['MEMBER', 'STAFF', 'MANAGER'])(view_func)
 
 
 def check_user_can_manage_items(user):

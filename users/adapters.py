@@ -13,24 +13,24 @@ from .models import User
 class NoSignupAccountAdapter(DefaultAccountAdapter):
     """
     Adapter for account signup with custom logic.
-    New users are created with TEACHER role by default.
+    New users are created with MEMBER role by default.
     """
 
     def is_open_for_signup(self, request):
         """
         Allow public signup.
-        New users will be created with TEACHER role.
+        New users will be created with MEMBER role.
         """
         return True
 
     def save_user(self, request, user, form, commit=True):
         """
-        Custom user save logic - creates new users with TEACHER role.
+        Custom user save logic - creates new users with MEMBER role.
         """
         user = super().save_user(request, user, form, commit=False)
 
-        # Set default role to TEACHER for new signups
-        user.role = 'TEACHER'
+        # Set default role to MEMBER for new signups
+        user.role = 'MEMBER'
         user.is_pre_registered = True  # Mark as registered since they just signed up
 
         if commit:
@@ -42,13 +42,13 @@ class NoSignupAccountAdapter(DefaultAccountAdapter):
 class PreRegisteredSocialAccountAdapter(DefaultSocialAccountAdapter):
     """
     Adapter for OAuth login.
-    Allows signup via OAuth - new users created with TEACHER role.
+    Allows signup via OAuth - new users created with MEMBER role.
     """
 
     def is_open_for_signup(self, request, sociallogin):
         """
         Allow OAuth signup for all users.
-        New OAuth users will be created with TEACHER role.
+        New OAuth users will be created with MEMBER role.
         """
         email = sociallogin.email_addresses[0].email if sociallogin.email_addresses else None
 
@@ -85,7 +85,7 @@ class PreRegisteredSocialAccountAdapter(DefaultSocialAccountAdapter):
                 return redirect('account_login')
 
         except User.DoesNotExist:
-            # New user - will be created with TEACHER role
+            # New user - will be created with MEMBER role
             pass
 
     def populate_user(self, request, sociallogin, data):
@@ -105,8 +105,8 @@ class PreRegisteredSocialAccountAdapter(DefaultSocialAccountAdapter):
                 user.role = existing_user.role  # Preserve existing role
                 user.is_pre_registered = True
             except User.DoesNotExist:
-                # New OAuth user - set TEACHER role by default
-                user.role = 'TEACHER'
+                # New OAuth user - set MEMBER role by default
+                user.role = 'MEMBER'
                 user.is_pre_registered = True
 
         return user
@@ -114,7 +114,7 @@ class PreRegisteredSocialAccountAdapter(DefaultSocialAccountAdapter):
     def save_user(self, request, sociallogin, form=None):
         """
         Save the social account user.
-        Updates existing users or creates new ones with TEACHER role.
+        Updates existing users or creates new ones with MEMBER role.
         """
         email = sociallogin.email_addresses[0].email if sociallogin.email_addresses else None
 
@@ -138,9 +138,9 @@ class PreRegisteredSocialAccountAdapter(DefaultSocialAccountAdapter):
                 return user
 
             except User.DoesNotExist:
-                # Create new OAuth user with TEACHER role
+                # Create new OAuth user with MEMBER role
                 user = super().save_user(request, sociallogin, form)
-                user.role = 'TEACHER'
+                user.role = 'MEMBER'
                 user.is_pre_registered = True
                 user.save()
                 return user

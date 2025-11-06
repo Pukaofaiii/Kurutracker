@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}import rooms from CSV - KURU Tracker{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-md p-8 border-l-4 border-kuru-blue">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-kuru-brown mb-2">import rooms from CSV</h1>
+                <p class="text-gray-600">upload a CSV file to bulk import room codes</p>
+            </div>
+            <a href="{% url 'locations:room_list' %}"
+               class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">
+                back to rooms
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Upload Form -->
+        <div class="bg-white rounded-xl shadow-md p-8">
+            <h2 class="text-xl font-bold text-kuru-brown mb-6">upload CSV file</h2>
+
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- CSV File Input -->
+                <div>
+                    <label for="{{ form.csv_file.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-2">
+                        {{ form.csv_file.label }} *
+                    </label>
+                    {{ form.csv_file }}
+                    {% if form.csv_file.help_text %}
+                    <p class="mt-1 text-sm text-gray-500">{{ form.csv_file.help_text }}</p>
+                    {% endif %}
+                    {% if form.csv_file.errors %}
+                    <p class="mt-1 text-sm text-kuru-danger">{{ form.csv_file.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Skip Duplicates Checkbox -->
+                <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                        {{ form.skip_duplicates }}
+                    </div>
+                    <div class="ml-3">
+                        <label for="{{ form.skip_duplicates.id_for_label }}" class="font-medium text-gray-700">
+                            {{ form.skip_duplicates.label }}
+                        </label>
+                        {% if form.skip_duplicates.help_text %}
+                        <p class="text-sm text-gray-500">{{ form.skip_duplicates.help_text }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4 border-t border-gray-200">
+                    <button type="submit"
+                            class="w-full px-6 py-3 bg-kuru-blue text-white rounded-lg hover:bg-kuru-blue/90 transition-colors duration-200 font-medium shadow-md flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        upload and import
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Instructions -->
+        <div class="space-y-6">
+            <!-- CSV Format Instructions -->
+            <div class="bg-white rounded-xl shadow-md p-8">
+                <h2 class="text-xl font-bold text-kuru-brown mb-4">CSV format instructions</h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-bold text-gray-700 mb-2">Required Columns:</h3>
+                        <ul class="list-disc list-inside space-y-1 text-sm text-gray-600">
+                            <li><code class="px-2 py-0.5 bg-gray-100 rounded">code</code> - Unique room code (required)</li>
+                            <li><code class="px-2 py-0.5 bg-gray-100 rounded">description</code> - Room description (optional)</li>
+                            <li><code class="px-2 py-0.5 bg-gray-100 rounded">is_active</code> - True/False (optional, defaults to True)</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-gray-700 mb-2">Accepted Values for is_active:</h3>
+                        <ul class="list-disc list-inside space-y-1 text-sm text-gray-600">
+                            <li>True values: <code class="px-1 bg-gray-100 rounded">True, 1, yes, y</code></li>
+                            <li>False values: <code class="px-1 bg-gray-100 rounded">False, 0, no, n</code></li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-kuru-blue/10 border-l-4 border-kuru-blue rounded p-4">
+                        <p class="text-sm text-gray-700">
+                            <strong>Note:</strong> The first row must contain column headers. Empty rows will be skipped.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample CSV -->
+            <div class="bg-white rounded-xl shadow-md p-8">
+                <h2 class="text-xl font-bold text-kuru-brown mb-4">sample CSV</h2>
+
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-x-auto">
+                    <pre class="text-sm text-gray-800 whitespace-pre">{{ sample_csv }}</pre>
+                </div>
+
+                <div class="mt-4">
+                    <button onclick="downloadSample()"
+                            class="w-full px-4 py-2 bg-kuru-green text-white rounded-lg hover:bg-kuru-green/90 transition-colors duration-200 font-medium flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        download sample CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Import Behavior -->
+            <div class="bg-white rounded-xl shadow-md p-8">
+                <h2 class="text-xl font-bold text-kuru-brown mb-4">import behavior</h2>
+
+                <div class="space-y-3">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-kuru-green mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-sm text-gray-700">
+                            <strong>Skip duplicates (checked):</strong> Existing rooms will be skipped
+                        </p>
+                    </div>
+
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-kuru-blue mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <p class="text-sm text-gray-700">
+                            <strong>Skip duplicates (unchecked):</strong> Existing rooms will be updated
+                        </p>
+                    </div>
+
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-kuru-yellow mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <p class="text-sm text-gray-700">
+                            <strong>Errors:</strong> Invalid rows will be reported but won't stop the import
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function downloadSample() {
+    const csvContent = '{{ sample_csv|escapejs }}';
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'sample_rooms.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+{% endblock %}

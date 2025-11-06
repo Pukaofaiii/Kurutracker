@@ -19,6 +19,7 @@ class TransferRequest(models.Model):
         ACCEPTED = 'ACCEPTED', 'Accepted'
         REJECTED = 'REJECTED', 'Rejected'
         EXPIRED = 'EXPIRED', 'Expired'
+        CANCELLED = 'CANCELLED', 'Cancelled'
 
     # Request metadata
     request_type = models.CharField(
@@ -176,11 +177,14 @@ class TransferRequest(models.Model):
 
     @property
     def days_until_expiry(self):
-        """Get days until expiration."""
+        """Get days until expiration (uses extended deadline if available)."""
         from django.utils import timezone
-        if self.status == self.Status.PENDING and self.expires_at:
-            delta = self.expires_at - timezone.now()
-            return max(0, delta.days)
+        if self.status == self.Status.PENDING:
+            # Use extended deadline if available, otherwise use original
+            deadline = self.expiration_extended_until or self.expires_at
+            if deadline:
+                delta = deadline - timezone.now()
+                return max(0, delta.days)
         return None
 
     def time_until_expiration(self):
@@ -275,7 +279,7 @@ class TransferRequest(models.Model):
 
         Args:
             days: Number of days to extend (from current deadline)
-            extended_by_user: User extending the deadline (must be MANAGER)
+            extended_by_user: User extending the deadline (must be MANAGER or STAFF)
 
         Returns:
             bool: True if extended successfully
@@ -284,8 +288,8 @@ class TransferRequest(models.Model):
         from datetime import timedelta
 
         # Validate permissions
-        if not extended_by_user.is_manager:
-            raise ValidationError("Only managers can extend expiration deadlines.")
+        if not (extended_by_user.is_manager or extended_by_user.is_staff_member):
+            raise ValidationError("Only managers and staff can extend expiration deadlines.")
 
         # Validate request is still pending
         if self.status != self.Status.PENDING:
@@ -442,6 +446,52 @@ class TransferRequest(models.Model):
             # If item was set to PENDING_INSPECTION, revert to NORMAL
             if self.item.status == 'PENDING_INSPECTION':
                 self.item.status = 'NORMAL'
+                self.item.save()
+
+        return True
+
+    @transaction.atomic
+    def cancel(self, cancelled_by_user, reason=None):
+        """
+        Cancel the transfer request.
+        Can be cancelled by either the sender or receiver if they are staff/manager.
+
+        Args:
+            cancelled_by_user: User cancelling the request
+            reason: Optional reason for cancellation
+
+        Returns:
+            bool: True if cancelled successfully
+        """
+        from django.utils import timezone
+
+        # Validate
+        if self.status != self.Status.PENDING:
+            raise ValidationError(f"Cannot cancel request that is {self.get_status_display()}.")
+
+        # Validate permissions - must be staff/manager
+        if not (cancelled_by_user.is_staff_member or cancelled_by_user.is_manager):
+            raise ValidationError("Only staff and managers can cancel requests.")
+
+        # Validate user is involved in this request (either sender or receiver)
+        if cancelled_by_user != self.from_user and cancelled_by_user != self.to_user:
+            raise ValidationError("You can only cancel requests you are involved in.")
+
+        # Update request status
+        self.status = self.Status.CANCELLED
+        self.resolved_at = timezone.now()
+        if reason:
+            self.notes = f"{self.notes or ''}\n[CANCELLED] {reason}".strip()
+        self.save()
+
+        # For RETURN requests, revert item status if it was set to PENDING_INSPECTION
+        if self.request_type == self.RequestType.RETURN:
+            if self.item.status == 'PENDING_INSPECTION':
+                # Revert to original status if we have it
+                if self.original_item_status:
+                    self.item.status = self.original_item_status
+                else:
+                    self.item.status = 'NORMAL'
                 self.item.save()
 
         return True

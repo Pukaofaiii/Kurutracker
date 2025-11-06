@@ -55,3 +55,26 @@ class LocationForm(forms.ModelForm):
                 'class': 'w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500'
             }),
         }
+
+
+class RoomCSVImportForm(forms.Form):
+    """Form for uploading CSV file to import rooms."""
+
+    csv_file = forms.FileField(
+        label='CSV File',
+        help_text='Upload a CSV file with columns: code, description, is_active',
+        widget=forms.FileInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500',
+            'accept': '.csv'
+        })
+    )
+
+    skip_duplicates = forms.BooleanField(
+        required=False,
+        initial=True,
+        label='Skip duplicate room codes',
+        help_text='If checked, rooms with existing codes will be skipped (not updated)',
+        widget=forms.CheckboxInput(attrs={
+            'class': 'rounded border-gray-300 text-kuru-blue focus:ring-kuru-blue'
+        })
+    )

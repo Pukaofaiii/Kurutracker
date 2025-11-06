@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load tz %}
+
+{% block title %}extend request - KURU Tracker{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-md p-8 border-l-4 border-kuru-green">
+        <h1 class="text-3xl font-bold text-kuru-brown mb-2">extend request deadline</h1>
+        <p class="text-gray-600">extend the expiration deadline for this transfer request</p>
+    </div>
+
+    <!-- Request Details -->
+    <div class="bg-white rounded-xl shadow-md p-8">
+        <h2 class="text-xl font-bold text-kuru-brown mb-6">request details</h2>
+
+        <div class="space-y-4">
+            <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                <span class="font-medium text-gray-700">request type:</span>
+                <span class="px-3 py-1 rounded text-xs font-bold
+                    {% if transfer.request_type == 'ASSIGN' %}bg-kuru-green/20 text-kuru-green
+                    {% else %}bg-kuru-blue/20 text-kuru-blue{% endif %}">
+                    {{ transfer.get_request_type_display }}
+                </span>
+            </div>
+
+            <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                <span class="font-medium text-gray-700">item:</span>
+                <span class="text-kuru-brown font-bold">{{ transfer.item.name }} ({{ transfer.item.asset_id }})</span>
+            </div>
+
+            <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                <span class="font-medium text-gray-700">from:</span>
+                <span class="text-gray-900">{{ transfer.from_user.email }}</span>
+            </div>
+
+            <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                <span class="font-medium text-gray-700">to:</span>
+                <span class="text-gray-900">{{ transfer.to_user.email }}</span>
+            </div>
+
+            <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                <span class="font-medium text-gray-700">current deadline:</span>
+                <span class="text-gray-900 font-medium">
+                    {% if transfer.expiration_extended_until %}
+                        {{ transfer.expiration_extended_until|date:"M d, Y H:i" }}
+                        <span class="text-xs text-kuru-green ml-1">(extended)</span>
+                    {% else %}
+                        {{ transfer.expires_at|date:"M d, Y H:i" }}
+                    {% endif %}
+                </span>
+            </div>
+
+            {% with days=transfer.days_until_expiry %}
+            {% if days is not None %}
+            <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                <span class="font-medium text-gray-700">time remaining:</span>
+                <span class="{% if days <= 1 %}text-kuru-danger{% elif days <= 2 %}text-kuru-yellow{% else %}text-kuru-green{% endif %} font-bold">
+                    {{ days }} day{{ days|pluralize }}
+                </span>
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- Extension Form -->
+    <div class="bg-white rounded-xl shadow-md p-8">
+        <form method="post" id="extendForm">
+            {% csrf_token %}
+
+            <div class="space-y-6">
+                <!-- Days Selection -->
+                <div>
+                    <label for="{{ form.days.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-2">
+                        {{ form.days.label }} *
+                    </label>
+                    {{ form.days }}
+                    {% if form.days.help_text %}
+                    <p class="mt-1 text-sm text-gray-500">{{ form.days.help_text }}</p>
+                    {% endif %}
+                    {% if form.days.errors %}
+                    <p class="mt-1 text-sm text-kuru-danger">{{ form.days.errors.0 }}</p>
+                    {% endif %}
+
+                    <!-- New Deadline Preview -->
+                    <div class="mt-3 p-4 bg-kuru-green/10 rounded-lg" id="newDeadlinePreview" style="display: none;">
+                        <p class="text-sm text-gray-700">
+                            <span class="font-medium">new deadline will be:</span>
+                            <span class="text-kuru-green font-bold ml-2" id="newDeadlineText"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label for="{{ form.notes.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-2">
+                        {{ form.notes.label }}
+                    </label>
+                    {{ form.notes }}
+                    {% if form.notes.help_text %}
+                    <p class="mt-1 text-sm text-gray-500">{{ form.notes.help_text }}</p>
+                    {% endif %}
+                    {% if form.notes.errors %}
+                    <p class="mt-1 text-sm text-kuru-danger">{{ form.notes.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Form Errors -->
+            {% if form.non_field_errors %}
+            <div class="mt-6 bg-kuru-danger/10 border-l-4 border-kuru-danger rounded-lg p-4">
+                <p class="text-kuru-danger font-medium">{{ form.non_field_errors.0 }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-end space-x-4 pt-6 mt-6 border-t border-gray-200">
+                <a href="{% url 'transfers:pending_requests' %}"
+                   class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">
+                    cancel
+                </a>
+                <button type="submit"
+                        class="px-6 py-2 bg-kuru-green text-white rounded-lg hover:bg-kuru-green/90 transition-colors duration-200 font-medium shadow-sm">
+                    extend deadline
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Calculate and preview new deadline
+document.addEventListener('DOMContentLoaded', function() {
+    const daysInput = document.getElementById('{{ form.days.id_for_label }}');
+    const preview = document.getElementById('newDeadlinePreview');
+    const previewText = document.getElementById('newDeadlineText');
+
+    // Current deadline
+    {% if transfer.expiration_extended_until %}
+    const currentDeadline = new Date('{{ transfer.expiration_extended_until|date:"c" }}');
+    {% else %}
+    const currentDeadline = new Date('{{ transfer.expires_at|date:"c" }}');
+    {% endif %}
+
+    function updatePreview() {
+        const days = parseInt(daysInput.value) || 0;
+        if (days > 0) {
+            const newDeadline = new Date(currentDeadline);
+            newDeadline.setDate(newDeadline.getDate() + days);
+
+            const options = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            previewText.textContent = newDeadline.toLocaleDateString('en-US', options);
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+
+    daysInput.addEventListener('input', updatePreview);
+    updatePreview(); // Initial call
+});
+</script>
+{% endblock %}

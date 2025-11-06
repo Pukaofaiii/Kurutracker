@@ -11,6 +11,7 @@ urlpatterns = [
     # Room management (manager only)
     path('rooms/', views.room_list, name='room_list'),
     path('rooms/create/', views.room_create, name='room_create'),
+    path('rooms/import/', views.room_import_csv, name='room_import'),
     path('rooms/<int:pk>/edit/', views.room_edit, name='room_edit'),
     path('rooms/<int:pk>/delete/', views.room_delete, name='room_delete'),
     path('rooms/<int:pk>/activate/', views.room_activate, name='room_activate'),

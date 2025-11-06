@@ -18,8 +18,8 @@ def dashboard_view(request):
     """
     user = request.user
 
-    if user.role == 'TEACHER':
-        return redirect('core:teacher_dashboard')
+    if user.role == 'MEMBER':
+        return redirect('core:member_dashboard')
     elif user.role == 'STAFF':
         return redirect('core:staff_dashboard')
     elif user.role == 'MANAGER':
@@ -29,11 +29,11 @@ def dashboard_view(request):
 
 
 @login_required
-def teacher_dashboard(request):
-    """Dashboard for Teacher role."""
+def member_dashboard(request):
+    """Dashboard for Member role."""
     user = request.user
 
-    # Get teacher's items
+    # Get member's items
     my_items = Item.objects.filter(current_owner=user)
 
     # Get pending requests (items being returned or assigned to me)
@@ -55,7 +55,7 @@ def teacher_dashboard(request):
         'pending_count': pending_requests_received.count(),
     }
 
-    return render(request, 'core/dashboard_teacher.html', context)
+    return render(request, 'core/dashboard_member.html', context)
 
 
 @login_required
@@ -121,7 +121,7 @@ def manager_dashboard(request):
 
     # User stats
     total_users = User.objects.filter(is_active=True).count()
-    teachers = User.objects.filter(role='TEACHER', is_active=True).count()
+    members = User.objects.filter(role='MEMBER', is_active=True).count()
     staff = User.objects.filter(role='STAFF', is_active=True).count()
     admins = User.objects.filter(role='MANAGER', is_active=True).count()
 
@@ -143,7 +143,7 @@ def manager_dashboard(request):
         'total_items': total_items,
         'items_by_status': items_by_status,
         'total_users': total_users,
-        'teachers': teachers,
+        'members': members,
         'staff': staff,
         'admins': admins,
         'pending_transfers': pending_transfers,

@@ -14,5 +14,8 @@ urlpatterns = [
     path('pending/', views.pending_requests, name='pending_requests'),
     path('<int:pk>/accept/', views.accept_request, name='accept_request'),
     path('<int:pk>/reject/', views.reject_request, name='reject_request'),
+    path('<int:pk>/cancel/', views.cancel_request, name='cancel_request'),
+    path('<int:pk>/edit/', views.edit_request, name='edit_request'),
+    path('<int:pk>/extend/', views.extend_request, name='extend_request'),
     path('history/', views.transfer_history, name='transfer_history'),
 ]

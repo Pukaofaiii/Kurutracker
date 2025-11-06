@@ -18,7 +18,7 @@ class UserPreRegisterForm(forms.ModelForm):
         widgets = {
             'email': forms.EmailInput(attrs={
                 'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': 'teacher@school.ac.th'
+                'placeholder': 'member@school.ac.th'
             }),
             'first_name': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
@@ -45,9 +45,9 @@ class UserPreRegisterForm(forms.ModelForm):
         self.request_user = kwargs.pop('request_user', None)
         super().__init__(*args, **kwargs)
 
-        # Staff can only add Teachers
+        # Staff can only add Members
         if self.request_user and self.request_user.role == 'STAFF':
-            self.fields['role'].choices = [('TEACHER', 'Teacher')]
+            self.fields['role'].choices = [('MEMBER', 'Member')]
 
     def clean_email(self):
         """Validate email is not already registered."""

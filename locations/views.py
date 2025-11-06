@@ -129,3 +129,97 @@ def room_activate(request, pk):
 
     context = {'room': room}
     return render(request, 'locations/room_activate_confirm.html', context)
+
+
+@manager_required
+def room_import_csv(request):
+    """Import rooms from CSV file."""
+    import csv
+    import io
+    from .forms import RoomCSVImportForm
+
+    if request.method == 'POST':
+        form = RoomCSVImportForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = request.FILES['csv_file']
+            skip_duplicates = form.cleaned_data['skip_duplicates']
+
+            # Validate file type
+            if not csv_file.name.endswith('.csv'):
+                messages.error(request, 'File must be a CSV file (.csv extension)')
+                return redirect('locations:room_import')
+
+            # Read CSV file
+            try:
+                decoded_file = csv_file.read().decode('utf-8')
+                io_string = io.StringIO(decoded_file)
+                reader = csv.DictReader(io_string)
+
+                created_count = 0
+                skipped_count = 0
+                updated_count = 0
+                errors = []
+
+                for row_num, row in enumerate(reader, start=2):  # Start at 2 (header is row 1)
+                    try:
+                        code = row.get('code', '').strip()
+                        description = row.get('description', '').strip()
+                        is_active_str = row.get('is_active', 'True').strip()
+
+                        # Validate required field
+                        if not code:
+                            errors.append(f"Row {row_num}: Missing required field 'code'")
+                            continue
+
+                        # Parse is_active
+                        is_active = is_active_str.lower() in ('true', '1', 'yes', 'y')
+
+                        # Check if room exists
+                        existing_room = Room.objects.filter(code=code).first()
+
+                        if existing_room:
+                            if skip_duplicates:
+                                skipped_count += 1
+                                continue
+                            else:
+                                # Update existing room
+                                existing_room.description = description if description else None
+                                existing_room.is_active = is_active
+                                existing_room.save()
+                                updated_count += 1
+                        else:
+                            # Create new room
+                            Room.objects.create(
+                                code=code,
+                                description=description if description else None,
+                                is_active=is_active
+                            )
+                            created_count += 1
+
+                    except Exception as e:
+                        errors.append(f"Row {row_num}: {str(e)}")
+
+                # Show results
+                if errors:
+                    for error in errors:
+                        messages.warning(request, error)
+
+                success_message = f"Import completed: {created_count} created"
+                if updated_count > 0:
+                    success_message += f", {updated_count} updated"
+                if skipped_count > 0:
+                    success_message += f", {skipped_count} skipped"
+
+                messages.success(request, success_message)
+                return redirect('locations:room_list')
+
+            except Exception as e:
+                messages.error(request, f"Error reading CSV file: {str(e)}")
+    else:
+        form = RoomCSVImportForm()
+
+    context = {
+        'form': form,
+        'sample_csv': 'code,description,is_active\nsc201,Science Lab 201,True\nsc202,Science Lab 202,True\nlib101,Main Library,True'
+    }
+    return render(request, 'locations/room_import.html', context)

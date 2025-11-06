@@ -32,7 +32,7 @@ class User(AbstractUser):
     """Custom user model with role-based access control."""
 
     class Role(models.TextChoices):
-        TEACHER = 'TEACHER', 'Teacher'
+        MEMBER = 'MEMBER', 'Member'
         STAFF = 'STAFF', 'Staff'
         MANAGER = 'MANAGER', 'Manager'
 
@@ -44,7 +44,7 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=10,
         choices=Role.choices,
-        default=Role.TEACHER,
+        default=Role.MEMBER,
         verbose_name='User Role'
     )
     is_pre_registered = models.BooleanField(
@@ -107,9 +107,9 @@ class User(AbstractUser):
         return self.first_name or self.email.split('@')[0]
 
     @property
-    def is_teacher(self):
-        """Check if user is a teacher."""
-        return self.role == self.Role.TEACHER
+    def is_member(self):
+        """Check if user is a member."""
+        return self.role == self.Role.MEMBER
 
     @property
     def is_staff_member(self):

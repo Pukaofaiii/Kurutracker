@@ -5,8 +5,21 @@
 {% block content %}
 <div class="space-y-6">
     <div class="bg-white rounded-xl shadow-md p-8 border-l-4 border-kuru-brown">
-        <h1 class="text-3xl font-bold text-kuru-brown mb-2">transfer history</h1>
-        <p class="text-gray-600">complete record of all transfers</p>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-kuru-brown mb-2">transfer history</h1>
+                <p class="text-gray-600">complete record of all transfers</p>
+            </div>
+            {% if user.is_staff_or_admin %}
+            <a href="{% url 'transfers:create_transfer' %}"
+               class="px-6 py-3 bg-kuru-blue text-white rounded-lg hover:bg-kuru-blue/90 transition-colors duration-200 font-medium shadow-md flex items-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span>create new transfer</span>
+            </a>
+            {% endif %}
+        </div>
     </div>
 
     <div class="bg-white rounded-xl shadow-md overflow-hidden">

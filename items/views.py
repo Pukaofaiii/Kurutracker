@@ -6,12 +6,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q
 
-from users.decorators import staff_required, owns_item_or_staff, teacher_or_staff_required
+from users.decorators import staff_required, owns_item_or_staff, member_or_staff_required
 from .models import Item, ItemCategory
 from .forms import ItemForm, ItemFilterForm, CategoryForm, UpdateLocationForm
 
 
-@teacher_or_staff_required
+@member_or_staff_required
 def item_list(request):
     """List all items with filtering."""
     items = Item.objects.all().select_related('category', 'current_owner')
@@ -39,8 +39,8 @@ def item_list(request):
         if owner:
             items = items.filter(current_owner_id=owner)
 
-    # If user is Teacher, only show their own items
-    if request.user.is_teacher:
+    # If user is Member, only show their own items
+    if request.user.is_member:
         items = items.filter(current_owner=request.user)
 
     # Hide removed items if filter is checked
@@ -83,13 +83,13 @@ def item_create(request):
     return render(request, 'items/item_form.html', context)
 
 
-@teacher_or_staff_required
+@member_or_staff_required
 def item_detail(request, pk):
     """View item details."""
     item = get_object_or_404(Item, pk=pk)
 
-    # Teachers can only view their own items
-    if request.user.is_teacher and item.current_owner != request.user:
+    # Members can only view their own items
+    if request.user.is_member and item.current_owner != request.user:
         messages.error(request, "You can only view items you own.")
         return redirect('items:item_list')
 
@@ -381,7 +381,7 @@ def bulk_transfer_items(request):
                 new_owner = User.objects.get(
                     pk=new_owner_id,
                     is_active=True,
-                    role__in=['STAFF', 'MANAGER', 'TEACHER']
+                    role__in=['STAFF', 'MANAGER', 'MEMBER']
                 )
             except User.DoesNotExist:
                 messages.error(request, "Selected user does not exist or is not active.")

@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 
-from users.decorators import staff_required, teacher_or_staff_required
+from users.decorators import staff_required, member_or_staff_required
 from .models import TransferRequest, TransferLog
 from .forms import TransferRequestForm, ReturnRequestForm, AcceptReturnForm, AcceptTransferForm, RejectRequestForm
 from items.models import Item
@@ -14,7 +14,7 @@ from django.db.models import Count, Q
 from notifications.utils import notify_new_request, notify_request_accepted, notify_request_rejected
 
 
-@teacher_or_staff_required
+@member_or_staff_required
 def transfer_overview(request):
     """Transfer overview page with statistics."""
 
@@ -51,7 +51,7 @@ def transfer_overview(request):
 
 @staff_required
 def create_transfer_request(request):
-    """Create a transfer request to assign item to teacher (Staff/Manager only)."""
+    """Create a transfer request to assign item to member (Staff/Manager only)."""
     if request.method == 'POST':
         form = TransferRequestForm(request.POST, request_user=request.user)
         if form.is_valid():
@@ -103,9 +103,9 @@ def create_transfer_request(request):
     return render(request, 'transfers/create_transfer.html', context)
 
 
-@teacher_or_staff_required
+@member_or_staff_required
 def create_return_request(request, item_id):
-    """Create a return request (Teacher → Staff)."""
+    """Create a return request (Member → Staff)."""
     item = get_object_or_404(Item, pk=item_id)
 
     # Verify user owns the item
@@ -156,13 +156,13 @@ def create_return_request(request, item_id):
     return render(request, 'transfers/create_return.html', context)
 
 
-@teacher_or_staff_required
+@member_or_staff_required
 def pending_requests(request):
     """View all pending requests."""
     # Requests I need to handle (sent to me)
     # For STAFF/MANAGER: Show ALL pending RETURN requests (any staff can accept returns)
     #                    + ASSIGN requests specifically sent to them
-    # For TEACHERS: Show only requests sent to them
+    # For MEMBERS: Show only requests sent to them
     if request.user.is_staff_or_admin:
         # Staff can see all RETURN requests OR ASSIGN requests sent to them
         requests_to_accept = TransferRequest.objects.filter(
@@ -170,7 +170,7 @@ def pending_requests(request):
             Q(to_user=request.user, request_type='ASSIGN', status='PENDING')  # Assigns to me
         ).select_related('item', 'from_user').order_by('-created_at')
     else:
-        # Teachers only see requests sent to them
+        # Members only see requests sent to them
         requests_to_accept = TransferRequest.objects.filter(
             to_user=request.user,
             status='PENDING'
@@ -190,7 +190,7 @@ def pending_requests(request):
     return render(request, 'transfers/pending_requests.html', context)
 
 
-@teacher_or_staff_required
+@member_or_staff_required
 def accept_request(request, pk):
     """Accept a transfer request."""
     transfer = get_object_or_404(TransferRequest, pk=pk)
@@ -267,7 +267,7 @@ def accept_request(request, pk):
     return render(request, 'transfers/accept_confirm.html', context)
 
 
-@teacher_or_staff_required
+@member_or_staff_required
 def reject_request(request, pk):
     """Reject a transfer request."""
     transfer = get_object_or_404(TransferRequest, pk=pk)
@@ -331,3 +331,159 @@ def transfer_history(request):
     }
 
     return render(request, 'transfers/transfer_history.html', context)
+
+
+@staff_required
+def cancel_request(request, pk):
+    """Cancel a pending transfer request (Staff/Manager only)."""
+    transfer = get_object_or_404(TransferRequest, pk=pk)
+
+    # Verify user can cancel this request
+    # Must be staff/manager and involved in the request (sender or receiver)
+    if transfer.from_user != request.user and transfer.to_user != request.user:
+        messages.error(request, "You can only cancel requests you are involved in.")
+        return redirect('transfers:pending_requests')
+
+    if transfer.status != 'PENDING':
+        messages.error(request, f"This request is already {transfer.get_status_display().lower()}.")
+        return redirect('transfers:pending_requests')
+
+    if request.method == 'POST':
+        from .forms import CancelRequestForm
+        form = CancelRequestForm(request.POST)
+        if form.is_valid():
+            reason = form.cleaned_data.get('reason', '')
+            try:
+                transfer.cancel(request.user, reason=reason)
+
+                # Send notification to the other party
+                from notifications.models import Notification
+                other_user = transfer.to_user if transfer.from_user == request.user else transfer.from_user
+                Notification.objects.create(
+                    recipient=other_user,
+                    notification_type='REQUEST_EXPIRED',  # Reuse EXPIRED type for cancelled
+                    title='Transfer Request Cancelled',
+                    message=f'{request.user.get_full_name() or request.user.email} cancelled a transfer request for {transfer.item.name}. {reason if reason else ""}',
+                    related_request=transfer
+                )
+
+                messages.success(
+                    request,
+                    f"Request cancelled successfully."
+                )
+                return redirect('transfers:pending_requests')
+            except ValidationError as e:
+                messages.error(request, str(e))
+                return redirect('transfers:pending_requests')
+    else:
+        from .forms import CancelRequestForm
+        form = CancelRequestForm()
+
+    context = {
+        'transfer': transfer,
+        'form': form,
+    }
+    return render(request, 'transfers/cancel_confirm.html', context)
+
+
+@staff_required
+def edit_request(request, pk):
+    """Edit a pending transfer request (Staff/Manager only, requests sent by user)."""
+    transfer = get_object_or_404(TransferRequest, pk=pk)
+
+    # Verify user can edit this request
+    # Can only edit requests they sent
+    if transfer.from_user != request.user:
+        messages.error(request, "You can only edit requests you sent.")
+        return redirect('transfers:pending_requests')
+
+    if transfer.status != 'PENDING':
+        messages.error(request, f"Cannot edit request that is {transfer.get_status_display().lower()}.")
+        return redirect('transfers:pending_requests')
+
+    if request.method == 'POST':
+        from .forms import EditTransferRequestForm
+        form = EditTransferRequestForm(request.POST, instance=transfer, request_user=request.user)
+        if form.is_valid():
+            try:
+                form.save()
+
+                # Send notification about the change
+                from notifications.models import Notification
+                Notification.objects.create(
+                    recipient=transfer.to_user,
+                    notification_type='REQUEST_UPDATED',
+                    title='Transfer Request Updated',
+                    message=f'{request.user.get_full_name() or request.user.email} updated a transfer request for {transfer.item.name}.',
+                    related_request=transfer
+                )
+
+                messages.success(
+                    request,
+                    f"Request updated successfully. {transfer.to_user.email} has been notified."
+                )
+                return redirect('transfers:pending_requests')
+            except ValidationError as e:
+                messages.error(request, str(e))
+    else:
+        from .forms import EditTransferRequestForm
+        form = EditTransferRequestForm(instance=transfer, request_user=request.user)
+
+    context = {
+        'transfer': transfer,
+        'form': form,
+    }
+    return render(request, 'transfers/edit_request.html', context)
+
+
+@staff_required
+def extend_request(request, pk):
+    """Extend a pending transfer request deadline (Staff/Manager only)."""
+    transfer = get_object_or_404(TransferRequest, pk=pk)
+
+    # Verify user can extend this request
+    # Can extend requests in both "Action Required" and "Requests Sent"
+    if transfer.from_user != request.user and transfer.to_user != request.user:
+        messages.error(request, "You can only extend requests you are involved in.")
+        return redirect('transfers:pending_requests')
+
+    if transfer.status != 'PENDING':
+        messages.error(request, f"Cannot extend request that is {transfer.get_status_display().lower()}.")
+        return redirect('transfers:pending_requests')
+
+    if request.method == 'POST':
+        from .forms import ExtendRequestForm
+        form = ExtendRequestForm(request.POST)
+        if form.is_valid():
+            days = form.cleaned_data['days']
+            notes = form.cleaned_data.get('notes', '')
+            try:
+                transfer.extend_expiration(days, request.user)
+
+                # Send notification about the extension
+                from notifications.models import Notification
+                other_user = transfer.to_user if transfer.from_user == request.user else transfer.from_user
+                Notification.objects.create(
+                    recipient=other_user,
+                    notification_type='REQUEST_EXTENDED',
+                    title='Transfer Request Deadline Extended',
+                    message=f'{request.user.get_full_name() or request.user.email} extended the deadline for {transfer.item.name} by {days} days. {notes if notes else ""}',
+                    related_request=transfer
+                )
+
+                messages.success(
+                    request,
+                    f"Request deadline extended by {days} days. {other_user.email} has been notified."
+                )
+                return redirect('transfers:pending_requests')
+            except ValidationError as e:
+                messages.error(request, str(e))
+    else:
+        from .forms import ExtendRequestForm
+        form = ExtendRequestForm()
+
+    context = {
+        'transfer': transfer,
+        'form': form,
+    }
+    return render(request, 'transfers/extend_request.html', context)

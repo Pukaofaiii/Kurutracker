@@ -5,9 +5,20 @@
 {% block content %}
 <div class="space-y-6">
     <!-- Header -->
-    <div>
-        <h1 class="text-3xl font-bold text-kuru-brown">pending requests</h1>
-        <p class="text-gray-600 mt-1">manage transfer and return requests</p>
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-kuru-brown">pending requests</h1>
+            <p class="text-gray-600 mt-1">manage transfer and return requests</p>
+        </div>
+        {% if user.is_staff_or_admin %}
+        <a href="{% url 'transfers:create_transfer' %}"
+           class="px-6 py-3 bg-kuru-blue text-white rounded-lg hover:bg-kuru-blue/90 transition-colors duration-200 font-medium shadow-md flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            <span>create new transfer</span>
+        </a>
+        {% endif %}
     </div>
 
     <!-- Requests to Accept -->
@@ -84,6 +95,16 @@
                                class="px-5 py-2 bg-kuru-danger text-white rounded-lg hover:bg-kuru-danger/90 transition-colors duration-200 font-medium text-center whitespace-nowrap shadow-sm">
                                 reject
                             </a>
+                            {% if user.is_staff_or_admin %}
+                            <a href="{% url 'transfers:extend_request' request.pk %}"
+                               class="px-5 py-2 bg-kuru-green text-white rounded-lg hover:bg-kuru-green/90 transition-colors duration-200 font-medium text-center whitespace-nowrap shadow-sm">
+                                extend
+                            </a>
+                            <a href="{% url 'transfers:cancel_request' request.pk %}"
+                               class="px-5 py-2 bg-kuru-yellow text-white rounded-lg hover:bg-kuru-yellow/90 transition-colors duration-200 font-medium text-center whitespace-nowrap shadow-sm">
+                                cancel
+                            </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -150,7 +171,23 @@
                                 {% endwith %}
                             </p>
                         </div>
-                        <span class="px-3 py-1 bg-kuru-yellow/20 text-kuru-yellow rounded text-sm font-medium ml-4">pending</span>
+                        <div class="flex flex-col space-y-2 ml-4">
+                            <span class="px-3 py-1 bg-kuru-yellow/20 text-kuru-yellow rounded text-sm font-medium text-center">pending</span>
+                            {% if user.is_staff_or_admin %}
+                            <a href="{% url 'transfers:edit_request' request.pk %}"
+                               class="px-4 py-1.5 bg-kuru-blue text-white rounded-lg hover:bg-kuru-blue/90 transition-colors duration-200 font-medium text-center text-sm whitespace-nowrap shadow-sm">
+                                edit
+                            </a>
+                            <a href="{% url 'transfers:extend_request' request.pk %}"
+                               class="px-4 py-1.5 bg-kuru-green text-white rounded-lg hover:bg-kuru-green/90 transition-colors duration-200 font-medium text-center text-sm whitespace-nowrap shadow-sm">
+                                extend
+                            </a>
+                            <a href="{% url 'transfers:cancel_request' request.pk %}"
+                               class="px-4 py-1.5 bg-kuru-yellow text-white rounded-lg hover:bg-kuru-yellow/90 transition-colors duration-200 font-medium text-center text-sm whitespace-nowrap shadow-sm">
+                                cancel
+                            </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
